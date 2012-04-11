@@ -37,7 +37,48 @@ If we had unlimited time, the goal would be to almost exactly replicate the proc
 
 
 %Tasks
-Being a more open-ended project without a specific end point in mind, it is difficult to list the exact steps along the way. However, we can loosely define an end goal as having some progress on each of the main sections above:
+The tasks for the project have been grouped into multiple milestones for tracking progress.
+
+\begin{itemize}
+\item Milestone 1
+\begin{itemize}
+\item Find tree model(s)
+\item Open and render tree model(s) using raytracing
+\item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees}
+\end{itemize}
+
+\item Milestone 2
+\begin{itemize}
+\item render trees using nearest-neighbors to current angle
+\item Basic programmatic tree seeding
+\item Basic terrain generation
+\end{itemize}
+
+\item Milestone 3
+\begin{itemize}
+\item Reconstruct 3d tree views using interpolation
+\item Lighting (see Lighting, below)
+\end{itemize}
+
+\item Lighting
+\begin{itemize}
+\item From the sun
+\begin{itemize}
+\item Lighting on leaves (as a participating medium)
+\begin{itemize}
+\item Hotspotting at the level of groups of leaves
+\item Hotspotting at the level of individual leaves
+\end{itemize}
+
+\item Surface light scattering
+\end{itemize}
+
+\item From the sky
+\item On the ground
+\end{itemize}
+
+\end{itemize}
+
 
 \begin {itemize}
 \item Rendering of individual trees with proper interpolation between views without ghosting or popping is required and should be completed early on.
