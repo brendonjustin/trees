@@ -13,6 +13,14 @@
 \section{Introduction}
 For our final project, we plan to implement a portion of Eric Bruneton and Fabrice Neyret's algorithm for real-time realistic rendering and lighting of forests \cite{trees}. In particular, we plan on implementing the near-tree model, which precalculates views of each tree, storing a selection of values per texel to assist in rendering. Once the simulation runs, these values are used to interpolate and determine how the tree should look from any given angle. The paper also goes over how to accurately and realistically light these trees from a number of factors. Getting this to look realistic and run in real-time could be a challenge, even with a source paper to refer to. Optimization will require use of hierarchical spatial data structures, storing data on the graphics card, and will likely require referring to other papers. Implementing every aspect of this method and optimizing it to run in real-time may be a bit too large for a final project, but there are many intermediate steps which could be stopped at while still having a good final project. For example, the lighting comes from multiple sources and could be implemented step by step.
 
+\section{Motivation}
+Trees are often a plentiful part of landscapes, and so rendering them at the same level of fidelity as foreground objects can make real-time rendering impossible.  At the same time, lower fidelity objects can detract from a scene's appearance, even if they are part of the background.  
+
+Quality tree models can be 250,000 or more triangles \cite{???}
+(see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
+
+Bruneton and Fabrice\cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
+
 %Some papers
 \section{Research Papers}
 The main source paper is \cite{trees}. I have identified a few relevant papers which may assist in the details of the implementation such as 
@@ -58,6 +66,18 @@ This plan requires a baseline in each of the identified categories, while allowi
   EUROGRAPHICS \textbf{27.2} (2008), available at
   \url{http://www-ljk.imag.fr/Publications/Basilic/com.lmc.publi.PUBLI_Article@1222d975265_acc57d/article.pdf}.
 
+\bibitem{many_polygons}
+  Farid
+  \emph{"Yes, but how many polygons?" An artist blog entry with interesting numbers}
+  Beyond3D Forum (2007), available at
+  \url{http://forum.beyond3d.com/showthread.php?t=43975}.
+
+\bibitem{fastlightfield}
+  Kolb, A., Rezk-Salama, C. \& Todt, S.
+  \emph{Fast (Spherical) Light Field Rendering with Per-Pixel Depth}
+  University of Siegen (2007), available at
+  \url{http://www.cg.informatik.uni-siegen.de/data/Publications/2007/tr1107_LightField.pdf}.
+
 \bibitem{treeszbuf}
   Max, N. \& Ohsaki, K.
   \emph{Rendering Trees from Precomputed Z-Buffer Views}.
@@ -71,12 +91,6 @@ This plan requires a baseline in each of the identified categories, while allowi
   %   year = {1995},
   %   pages = {45--54}
   % }
-
-\bibitem{fastlightfield}
-  Kolb, A., Rezk-Salama, C. \& Todt, S.
-  \emph{Fast (Spherical) Light Field Rendering with Per-Pixel Depth}
-  University of Siegen (2007), available at
-  \url{http://www.cg.informatik.uni-siegen.de/data/Publications/2007/tr1107_LightField.pdf}.
 
 \end{thebibliography}
 
