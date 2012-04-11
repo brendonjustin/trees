@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{hyperref}
+
+\begin{document}
+%Title
+\title{Advanced Computer Graphics Final Project Proposal}
+\author{Auston Sterling: sterla@rpi.edu \\ Brendon Justin: justib@rpi.edu}
+\date{}
+\maketitle
+
+%Description
+\section{Introduction}
+For our final project, we plan to implement a portion of Eric Bruneton and Fabrice Neyret's algorithm for real-time realistic rendering and lighting of forests \cite{trees}. In particular, we plan on implementing the near-tree model, which precalculates views of each tree, storing a selection of values per texel to assist in rendering. Once the simulation runs, these values are used to interpolate and determine how the tree should look from any given angle. The paper also goes over how to accurately and realistically light these trees from a number of factors. Getting this to look realistic and run in real-time could be a challenge, even with a source paper to refer to. Optimization will require use of hierarchical spatial data structures, storing data on the graphics card, and will likely require referring to other papers. Implementing every aspect of this method and optimizing it to run in real-time may be a bit too large for a final project, but there are many intermediate steps which could be stopped at while still having a good final project. For example, the lighting comes from multiple sources and could be implemented step by step.
+
+%Some papers
+\section{Research Papers}
+The main source paper is \cite{trees}. I have identified a few relevant papers which may assist in the details of the implementation such as 
+\cite{vecterrain}, which provides details about their quad-tree design \cite{treeszbuf}, an older paper describing a similar strategy for rendering trees, though with some ghosting and without as much attention given to lighting \cite{fastlightfield}, which was a large inspiration for the tree rendering algortihm.  However, the main paper provides plenty more references which could be useful. There will be plenty of reading to do.
+
+%Intermediate steps
+\section{Intermediate Steps and Tasks}
+The first step is to create the many views of a model and simply use a nearest neighbor lookup to find the closest view and display it. This will likely have no lighting and will have extreme popping while rotating the camera. 
+After that, interpolation between views will probably be the highest priority. 
+From there, there are actually many different areas to pursue. We could take some steps to make the lighting more accurate on the different scales of the trees. There are many effects to take into account here, such as lighting from the sun and sky. 
+We could also attempt to implement the paper's system for storing and accessing the trees and terrain. A large part of the paper is solving the problem of rendering large amounts of densely packed trees, and it would be nice to make a forest look like a forest. 
+Another goal would be to optimize the program for higher frame rate. This could be done through a lot of methods, but it should be possible given that the original paper accomplished it. 
+If we had unlimited time, the goal would be to almost exactly replicate the process in the paper, but that is going to be beyond the scope of a one month project. We will likely plan as we go, deciding that maybe lighting is ``good enough for now'' and that optimization should take more of our efforts.
+
+
+%Tasks
+Being a more open-ended project without a specific end point in mind, it is difficult to list the exact steps along the way. However, we can loosely define an end goal as having some progress on each of the main sections above:
+
+\begin {itemize}
+\item Rendering of individual trees with proper interpolation between views without ghosting or popping is required and should be completed early on.
+
+\item Throughout the month or so of work, run-time should stay above at least 2-3 frames per second and allow for user control of camera position. Ideally, this would be much higher, but we may not have the time or the skills to optimize to this extent.
+
+\item For lighting, a good minimum would be being able to tell the difference between the side of the tree being lit by the sun and the side facing away. Over the weeks, cascaded shadow maps, lighting from all sources, and proper balancing of these light sources will all be goals.
+
+\item Terrain and large scale forest rendering should at least show a good amount of trees in a grid ("good amount" depending on how much the computer can handle). Displaying a terrain height map, texturing the ground appropriately, storing the locations of the trees in video card memory, and aperiodically tiling seeds across the landscape are all feasible goals to reach.
+
+\end {itemize}
+
+This plan requires a baseline in each of the identified categories, while allowing for flexibility in which optional paths to follow.
+
+\begin{thebibliography}{9}
+
+\bibitem{trees}
+  Bruneton, E.\& Neyret, F.
+  \emph{Real-time Realistic Rendering and Lighting of Forests}.
+  Computer Graphics Forum \textbf{31.2} (2012), available at
+  \url{http://hal.inria.fr/hal-00650120/en}.
+
+\bibitem{vecterrain}
+  Bruneton, E.\& Neyret, F.
+  \emph{Real-time rendering and editing of vector-based terrains}.
+  EUROGRAPHICS \textbf{27.2} (2008), available at
+  \url{http://www-ljk.imag.fr/Publications/Basilic/com.lmc.publi.PUBLI_Article@1222d975265_acc57d/article.pdf}.
+
+\bibitem{treeszbuf}
+  Max, N. \& Ohsaki, K.
+  \emph{Rendering Trees from Precomputed Z-Buffer Views}.
+  In Eurographics Rendering Workshop (1995), 45--54, available at
+  \url{http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.17.30}.
+  % (bibtex:)
+  % @INPROCEEDINGS{Max95renderingtrees,
+  %   author = {Nelson Max and Keiichi Ohsaki},
+  %   title = {Rendering Trees from Precomputed Z-Buffer Views},
+  %   booktitle = {In Eurographics Rendering Workshop},
+  %   year = {1995},
+  %   pages = {45--54}
+  % }
+
+\bibitem{fastlightfield}
+  Kolb, A., Rezk-Salama, C. \& Todt, S.
+  \emph{Fast (Spherical) Light Field Rendering with Per-Pixel Depth}
+  University of Siegen (2007), available at
+  \url{http://www.cg.informatik.uni-siegen.de/data/Publications/2007/tr1107_LightField.pdf}.
+
+\end{thebibliography}
+
+\end{document}
