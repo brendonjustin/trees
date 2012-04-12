@@ -5,4 +5,4 @@ proposal.pdf: proposal.tex
 #	pdflatex proposal.tex
 
 clean:
-	rm *.aux *.log proposal.pdf
+	rm *.aux *.log *.out proposal.pdf
