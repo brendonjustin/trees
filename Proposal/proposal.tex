@@ -16,10 +16,10 @@ For our final project, we plan to implement a portion of Eric Bruneton and Fabri
 \section{Motivation}
 Trees are often a plentiful part of landscapes, and so rendering them at the same level of fidelity as foreground objects can make real-time rendering impossible.  At the same time, lower fidelity objects can detract from a scene's appearance, even if they are part of the background.  
 
-Quality tree models can be 250,000 or more triangles \cite{???}
-(see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
+Quality tree models can be 250,000 or more triangles
+(for example, see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame \cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
 
-Bruneton and Fabrice\cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
+Bruneton and Fabrice \cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
 
 %Some papers
 \section{Research Papers}
@@ -79,20 +79,7 @@ The tasks for the project have been grouped into multiple milestones for trackin
 
 \end{itemize}
 
-
-\begin {itemize}
-\item Rendering of individual trees with proper interpolation between views without ghosting or popping is required and should be completed early on.
-
-\item Throughout the month or so of work, run-time should stay above at least 2-3 frames per second and allow for user control of camera position. Ideally, this would be much higher, but we may not have the time or the skills to optimize to this extent.
-
-\item For lighting, a good minimum would be being able to tell the difference between the side of the tree being lit by the sun and the side facing away. Over the weeks, cascaded shadow maps, lighting from all sources, and proper balancing of these light sources will all be goals.
-
-\item Terrain and large scale forest rendering should at least show a good amount of trees in a grid ("good amount" depending on how much the computer can handle). Displaying a terrain height map, texturing the ground appropriately, storing the locations of the trees in video card memory, and aperiodically tiling seeds across the landscape are all feasible goals to reach.
-
-\end {itemize}
-
-This plan requires a baseline in each of the identified categories, while allowing for flexibility in which optional paths to follow.
-
+\newpage
 \begin{thebibliography}{9}
 
 \bibitem{trees}
