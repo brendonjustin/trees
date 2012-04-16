@@ -16,10 +16,15 @@ For our final project, we plan to implement a portion of Eric Bruneton and Fabri
 \section{Motivation}
 Trees are often a plentiful part of landscapes, and so rendering them at the same level of fidelity as foreground objects can make real-time rendering impossible.  At the same time, lower fidelity objects can detract from a scene's appearance, even if they are part of the background.  
 
+<<<<<<< HEAD
 Quality tree models can be 250,000 or more triangles \cite{???}
 (see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, conventional rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
+=======
+Quality tree models can be 250,000 or more triangles
+(for example, see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame \cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
+>>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 
-Bruneton and Fabrice\cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
+Bruneton and Fabrice \cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
 
 %Some papers
 \section{Research Papers}
@@ -37,50 +42,68 @@ The main source paper is \cite{trees}. We have identified a few relevant papers 
 
 
 %Tasks
-The tasks for the project have been grouped into multiple milestones for tracking progress:
+The tasks for the project have been grouped into multiple milestones for tracking progress.  Each task is also tentatively assigned to an individual:
 
 \begin{itemize}
 \item Milestone 1
 \begin{itemize}
+<<<<<<< HEAD
 \item Find tree model(s)
 \item Open and render tree model(s)
 \item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees}
 \item Render trees using nearest-neighbors to current angle
+=======
+\item Find tree model(s) (both)
+\item Open and render tree model(s) using raytracing (Auston)
+\item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees} (Auston)
+>>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 \end{itemize}
 
 \item Milestone 2
 \begin{itemize}
+<<<<<<< HEAD
 \item Basic programmatic tree seeding
 \item Basic terrain generation
 \item Reconstruct 3d tree views using interpolation
+=======
+\item Render trees using nearest-neighbors to current angle (Brendon)
+\item Basic programmatic tree seeding (Brendon)
+\item Basic terrain generation (Brendon)
+>>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 \end{itemize}
 
 \item Milestone 3
 \begin{itemize}
+<<<<<<< HEAD
 \item Lighting (see Lighting, below)
 \item Complex terrain generation and tree seeding
 \item Optimization
+=======
+\item Reconstruct 3d tree views using interpolation (Auston)
+\item Lighting (see Lighting, below) (both)
+>>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 \end{itemize}
 
 \item Lighting
 \begin{itemize}
-\item From the sun
+\item From the sun (both)
 \begin{itemize}
-\item Lighting on leaves (as a participating medium)
+\item Lighting on leaves, as a participating medium
 \begin{itemize}
-\item Hotspotting at the level of groups of leaves
-\item Hotspotting at the level of individual leaves
+\item Hotspotting at the level of groups of leaves (Brendon)
+\item Hotspotting at the level of individual leaves (Auston)
 \end{itemize}
 
-\item Surface light scattering
+\item Surface light scattering (Auston)
 \end{itemize}
 
-\item From the sky
-\item On the ground
+\item From the sky (Brendon)
+\item On the ground (Brendon)
 \end{itemize}
 
 \end{itemize}
 
+<<<<<<< HEAD
 
 \begin {itemize}
 \item The first milestone involves a majority of the precomputation for tree rendering. By TARGET-DATE-1, a grid of tree views should be rendered, though this will lack any lighting and will noticably pop between views while rotating the camera.
@@ -95,6 +118,9 @@ The tasks for the project have been grouped into multiple milestones for trackin
 
 This plan requires a baseline in each of the identified categories, while allowing for flexibility in which optional paths to follow.
 
+=======
+\newpage
+>>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 \begin{thebibliography}{9}
 
 \bibitem{trees}
