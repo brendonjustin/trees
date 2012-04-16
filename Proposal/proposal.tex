@@ -16,13 +16,8 @@ For our final project, we plan to implement a portion of Eric Bruneton and Fabri
 \section{Motivation}
 Trees are often a plentiful part of landscapes, and so rendering them at the same level of fidelity as foreground objects can make real-time rendering impossible.  At the same time, lower fidelity objects can detract from a scene's appearance, even if they are part of the background.  
 
-<<<<<<< HEAD
-Quality tree models can be 250,000 or more triangles \cite{???}
-(see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, conventional rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
-=======
 Quality tree models can be 250,000 or more triangles
 (for example, see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame \cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
->>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 
 Bruneton and Fabrice \cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
 
@@ -45,50 +40,33 @@ The main source paper is \cite{trees}. We have identified a few relevant papers 
 The tasks for the project have been grouped into multiple milestones for tracking progress.  Each task is also tentatively assigned to an individual:
 
 \begin{itemize}
-\item Milestone 1
+\item Milestone 1: TARGET-DATE-1
 \begin{itemize}
-<<<<<<< HEAD
-\item Find tree model(s)
-\item Open and render tree model(s)
-\item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees}
-\item Render trees using nearest-neighbors to current angle
-=======
 \item Find tree model(s) (both)
-\item Open and render tree model(s) using raytracing (Auston)
+\item Open and render tree model(s) (Auston)
 \item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees} (Auston)
->>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
+\item Render trees using nearest-neighbors to current angle (Brendon)
 \end{itemize}
 
-\item Milestone 2
+\item Milestone 2: TARGET-DATE-2
 \begin{itemize}
-<<<<<<< HEAD
-\item Basic programmatic tree seeding
-\item Basic terrain generation
-\item Reconstruct 3d tree views using interpolation
-=======
-\item Render trees using nearest-neighbors to current angle (Brendon)
 \item Basic programmatic tree seeding (Brendon)
 \item Basic terrain generation (Brendon)
->>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
+\item Reconstruct 3d tree views using interpolation (Auston)
 \end{itemize}
 
-\item Milestone 3
+\item Milestone 3: DUE-DATE
 \begin{itemize}
-<<<<<<< HEAD
-\item Lighting (see Lighting, below)
-\item Complex terrain generation and tree seeding
-\item Optimization
-=======
-\item Reconstruct 3d tree views using interpolation (Auston)
 \item Lighting (see Lighting, below) (both)
->>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
+\item Complex terrain generation and tree seeding (Brendon)
+\item Optimization (Auston)
 \end{itemize}
 
 \item Lighting
 \begin{itemize}
 \item From the sun (both)
 \begin{itemize}
-\item Lighting on leaves, as a participating medium
+\item Lighting on leaves, as a participating medium (both)
 \begin{itemize}
 \item Hotspotting at the level of groups of leaves (Brendon)
 \item Hotspotting at the level of individual leaves (Auston)
@@ -103,24 +81,15 @@ The tasks for the project have been grouped into multiple milestones for trackin
 
 \end{itemize}
 
-<<<<<<< HEAD
-
 \begin {itemize}
 \item The first milestone involves a majority of the precomputation for tree rendering. By TARGET-DATE-1, a grid of tree views should be rendered, though this will lack any lighting and will noticably pop between views while rotating the camera.
 
-\item The second milestone introduces aspects 
+\item The second milestone introduces aspects of forests other than simply rendering a grid of trees. Having trees scattered over Earth-like terrain will help make the forest look realistic. At the same time, tree rendering can become more complete; removing the popping between views but still missing the lighting.
 
-\item For lighting, a good minimum would be being able to tell the difference between the side of the tree being lit by the sun and the side facing away. Over the weeks, cascaded shadow maps, lighting from all sources, and proper balancing of these light sources will all be goals.
-
-\item Terrain and large scale forest rendering should at least show a good amount of trees in a grid ("good amount" depending on how much the computer can handle). Displaying a terrain height map, texturing the ground appropriately, storing the locations of the trees in video card memory, and aperiodically tiling seeds across the landscape are all feasible goals to reach.
-
+\item Milestone three finishes off the implementation with accurate lighting, as well as more detailed terrain and seeding. This is also the time to ensure that the program can run at at least a few frames per second. By the end of the project, fully lit and properly rendered trees should be dispersed over a realistic terrain.
 \end {itemize}
 
-This plan requires a baseline in each of the identified categories, while allowing for flexibility in which optional paths to follow.
-
-=======
 \newpage
->>>>>>> feeaf9c369b99f89bb1ebde6fdc3150a6f5133f0
 \begin{thebibliography}{9}
 
 \bibitem{trees}
