@@ -11,29 +11,29 @@
 
 %Description
 \section{Introduction}
-For our final project, we plan to implement a portion of Eric Bruneton and Fabrice Neyret's algorithm for real-time realistic rendering and lighting of forests \cite{trees}. In particular, we plan on implementing the near-tree model, which precalculates views of each tree, storing a selection of values per texel to assist in rendering. Once the simulation runs, these values are used to interpolate and determine how the tree should look from any given angle. The paper also goes over how to accurately and realistically light these trees from a number of factors. Getting this to look realistic and run in real-time could be a challenge, even with a source paper to refer to. Optimization will require use of hierarchical spatial data structures, storing data on the graphics card, and will likely require referring to other papers. Implementing every aspect of this method and optimizing it to run in real-time may be a bit too large for a final project, but there are many intermediate steps which could be stopped at while still having a good final project. For example, the lighting comes from multiple sources and could be implemented step by step.
+For our final project, we plan to implement a portion of Eric Bruneton and Fabrice Neyret's algorithm for real-time realistic rendering and lighting of forests \cite{trees}. In particular, we plan on implementing the near-tree model, which precalculates two dimensional views of each tree, storing a selection of values per texel to assist in rendering. Once the simulation runs, these values are used to interpolate and determine how the tree should look from any given angle. We will also attempt to accurately and realistically light these trees from a number of factors. Getting this to look realistic and run in real-time could be a challenge, even with a source paper to refer to. Optimization will require use of hierarchical spatial data structures, storing data on the graphics card, and will likely require referring to other papers. Implementing every aspect of this method and optimizing it to run in real-time may be a bit too large for a final project, but there are many intermediate steps which could be stopped at while still having a good final project.
 
 \section{Motivation}
 Trees are often a plentiful part of landscapes, and so rendering them at the same level of fidelity as foreground objects can make real-time rendering impossible.  At the same time, lower fidelity objects can detract from a scene's appearance, even if they are part of the background.  
 
 Quality tree models can be 250,000 or more triangles \cite{???}
-(see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, convention rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
+(see \url{http://www.sharecg.com/v/36271/gallery/5/3D-Model/Alder-Tree-OBJ?interstitial_displayed=Yes}).  Just 40 of such trees would involve 10 million polygons.  For comparison, a frame in the 2007 game Lost Planet can have 3 million polygons in a frame\cite{many_polygons}.  Clearly, conventional rendering methods do not permit the use of such models in games.  Games instead include low quality tree models, or decrease landscape detail with distance from the player.
 
 Bruneton and Fabrice\cite{trees} implemented a fast means of rendering high quality faraway trees.  We wish to duplicate their success, rendering 1,000 or more distant trees.  As in \cite{trees}, we plan to include complex lighting effects: intra-tree shadowing, self-shadowing and hotspotting for leaves, ‘silver-lining’, and ground shadowing.
 
 %Some papers
 \section{Research Papers}
-The main source paper is \cite{trees}. I have identified a few relevant papers which may assist in the details of the implementation such as 
+The main source paper is \cite{trees}. We have identified a few relevant papers which may assist in the details of the implementation such as 
 \cite{vecterrain}, which provides details about their quad-tree design \cite{treeszbuf}, an older paper describing a similar strategy for rendering trees, though with some ghosting and without as much attention given to lighting \cite{fastlightfield}, which was a large inspiration for the tree rendering algortihm.  However, the main paper provides plenty more references which could be useful. There will be plenty of reading to do.
 
 %Intermediate steps
-\section{Intermediate Steps and Tasks}
-The first step is to create the many views of a model and simply use a nearest neighbor lookup to find the closest view and display it. This will likely have no lighting and will have extreme popping while rotating the camera. 
-After that, interpolation between views will probably be the highest priority. 
-From there, there are actually many different areas to pursue. We could take some steps to make the lighting more accurate on the different scales of the trees. There are many effects to take into account here, such as lighting from the sun and sky. 
-We could also attempt to implement the paper's system for storing and accessing the trees and terrain. A large part of the paper is solving the problem of rendering large amounts of densely packed trees, and it would be nice to make a forest look like a forest. 
-Another goal would be to optimize the program for higher frame rate. This could be done through a lot of methods, but it should be possible given that the original paper accomplished it. 
-If we had unlimited time, the goal would be to almost exactly replicate the process in the paper, but that is going to be beyond the scope of a one month project. We will likely plan as we go, deciding that maybe lighting is ``good enough for now'' and that optimization should take more of our efforts.
+%\section{Intermediate Steps and Tasks}
+%The first step is to create the many views of a model and simply use a nearest neighbor lookup to find the closest view and display it. This will likely have no lighting and will have extreme popping while rotating the camera. 
+%After that, interpolation between views will probably be the highest priority. 
+%From there, there are actually many different areas to pursue. We could take some steps to make the lighting more accurate on the different scales of the trees. There are many effects to take into account here, such as lighting from the sun and sky. 
+%We could also attempt to implement the paper's system for storing and accessing the trees and terrain. A large part of the paper is solving the problem of rendering large amounts of densely packed trees, and it would be nice to make a forest look like a forest. 
+%Another goal would be to optimize the program for higher frame rate. This could be done through a lot of methods, but it should be possible given that the original paper accomplished it. 
+%If we had unlimited time, the goal would be to almost exactly replicate the process in the paper, but that is going to be beyond the scope of a one month project. We will likely plan as we go, deciding that maybe lighting is ``good enough for now'' and that optimization should take more of our efforts.
 
 
 %Tasks
@@ -43,21 +43,23 @@ The tasks for the project have been grouped into multiple milestones for trackin
 \item Milestone 1
 \begin{itemize}
 \item Find tree model(s)
-\item Open and render tree model(s) using raytracing
+\item Open and render tree model(s)
 \item Save views of rendered tree, with additional per-texel data ‘minimal and maximal depths $z$ and $\bar{z}$, an ambient occlusion $\delta$, and an opacity $\alpha$’\cite{trees}
+\item Render trees using nearest-neighbors to current angle
 \end{itemize}
 
 \item Milestone 2
 \begin{itemize}
-\item Render trees using nearest-neighbors to current angle
 \item Basic programmatic tree seeding
 \item Basic terrain generation
+\item Reconstruct 3d tree views using interpolation
 \end{itemize}
 
 \item Milestone 3
 \begin{itemize}
-\item Reconstruct 3d tree views using interpolation
 \item Lighting (see Lighting, below)
+\item Complex terrain generation and tree seeding
+\item Optimization
 \end{itemize}
 
 \item Lighting
@@ -81,9 +83,9 @@ The tasks for the project have been grouped into multiple milestones for trackin
 
 
 \begin {itemize}
-\item Rendering of individual trees with proper interpolation between views without ghosting or popping is required and should be completed early on.
+\item The first milestone involves a majority of the precomputation for tree rendering. By TARGET-DATE-1, a grid of tree views should be rendered, though this will lack any lighting and will noticably pop between views while rotating the camera.
 
-\item Throughout the month or so of work, run-time should stay above at least 2-3 frames per second and allow for user control of camera position. Ideally, this would be much higher, but we may not have the time or the skills to optimize to this extent.
+\item The second milestone introduces aspects 
 
 \item For lighting, a good minimum would be being able to tell the difference between the side of the tree being lit by the sun and the side facing away. Over the weeks, cascaded shadow maps, lighting from all sources, and proper balancing of these light sources will all be goals.
 
