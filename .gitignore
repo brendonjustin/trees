@@ -3,4 +3,15 @@
 *.out
 *.pdf
 *.sublime*
+
 *.DS_Store
+
+build/
+xcuserdata/
+*.xcodeproj/
+Debug/
+
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+*.cmake
