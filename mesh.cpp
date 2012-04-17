@@ -242,11 +242,15 @@ void Mesh::initializeVBOs() {
   glGenBuffers(1, &mesh_boundary_edge_indices_VBO);
   glGenBuffers(1, &mesh_crease_edge_indices_VBO);
   glGenBuffers(1, &mesh_other_edge_indices_VBO);
+  glGenBuffers(1, &gnd_mesh_tri_verts_VBO);
+  glGenBuffers(1, &gnd_mesh_tri_indices_VBO);
+  glGenBuffers(1, &gnd_mesh_verts_VBO);
   setupVBOs();
 }
 
 void Mesh::setupVBOs() {
   HandleGLError("in setup mesh VBOs");
+  setupGndTriVBOs();
   setupTriVBOs();
   setupEdgeVBOs();
   HandleGLError("leaving setup mesh");
@@ -258,10 +262,11 @@ void Mesh::setupTriVBOs() {
   VBOTriVert* mesh_tri_verts;
   VBOTri* mesh_tri_indices;
   unsigned int num_tris = triangles.size();
-
+  
   // allocate space for the data
   mesh_tri_verts = new VBOTriVert[num_tris*3];
   mesh_tri_indices = new VBOTri[num_tris];
+  
 
   // write the vertex & triangle data
   unsigned int i = 0;
@@ -337,6 +342,45 @@ void Mesh::setupTriVBOs() {
 
 }
 
+void Mesh::setupGndTriVBOs() {
+  //  The scene's ground
+  VBOTriVert* gnd_mesh_tri_verts;
+  VBOTri* gnd_mesh_tri_indices;
+  unsigned int num_tris = 2;
+  
+  Vec3f a, b, c, d, normal;
+  
+  gnd_mesh_tri_verts = new VBOTriVert[num_tris*3];
+  gnd_mesh_tri_indices = new VBOTri[num_tris];
+  
+  a = Vec3f(0, 0, 0);
+  b = Vec3f(1, 0, 0);
+  c = Vec3f(1, 1, 0);
+  d = Vec3f(0, 1, 0);
+  normal = Vec3f(0, 0, 1);
+  
+  gnd_mesh_tri_verts[0] = VBOTriVert(a,normal);
+  gnd_mesh_tri_verts[1] = VBOTriVert(b,normal);
+  gnd_mesh_tri_verts[2] = VBOTriVert(c,normal);
+  gnd_mesh_tri_verts[3] = VBOTriVert(d,normal);
+
+  gnd_mesh_tri_indices[0] = VBOTri(0, 1, 2);
+  gnd_mesh_tri_indices[1] = VBOTri(2, 0, 3);
+
+  glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
+  glBufferData(GL_ARRAY_BUFFER,
+         sizeof(VBOTriVert) * num_tris * 3,
+         gnd_mesh_tri_verts,
+         GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,gnd_mesh_tri_indices_VBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+         sizeof(VBOTri) * num_tris,
+         gnd_mesh_tri_indices,
+         GL_STATIC_DRAW);
+
+  delete [] gnd_mesh_tri_verts;
+  delete [] gnd_mesh_tri_indices;
+}
 
 void Mesh::setupEdgeVBOs() {
 
@@ -452,6 +496,9 @@ void Mesh::cleanupVBOs() {
   glDeleteBuffers(1, &mesh_boundary_edge_indices_VBO);
   glDeleteBuffers(1, &mesh_crease_edge_indices_VBO);
   glDeleteBuffers(1, &mesh_other_edge_indices_VBO);
+  glDeleteBuffers(1, &gnd_mesh_tri_verts_VBO);
+  glDeleteBuffers(1, &gnd_mesh_tri_indices_VBO);
+  glDeleteBuffers(1, &gnd_mesh_verts_VBO);
 }
 
 
@@ -639,8 +686,9 @@ void Mesh::LoopSubdivision() {
     }
   }
   
+  std::vector<std::pair<Vertex *, Vec3f> >::iterator iter;
   //  Set the vertices' new positions
-  for (std::vector<std::pair<Vertex *, Vec3f> >::iterator iter = newPositions.begin(); iter != newPositions.end(); iter++) {
+  for (iter = newPositions.begin(); iter != newPositions.end(); iter++) {
     iter->first->setPos(iter->second);
   }
   

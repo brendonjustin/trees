@@ -127,6 +127,8 @@ private:
   void setupTriVBOs();
   void setupEdgeVBOs();
   
+  void setupGndTriVBOs();
+  
   // ==============
   // REPRESENTATION
   ArgParser *args;
@@ -146,6 +148,9 @@ private:
   GLuint mesh_boundary_edge_indices_VBO;
   GLuint mesh_crease_edge_indices_VBO;
   GLuint mesh_other_edge_indices_VBO;
+  GLuint gnd_mesh_tri_verts_VBO;
+  GLuint gnd_mesh_tri_indices_VBO;
+  GLuint gnd_mesh_verts_VBO;
 
 };
 
