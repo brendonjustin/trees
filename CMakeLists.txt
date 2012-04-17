@@ -28,18 +28,18 @@ add_executable(trees
 # platform specific compiler flags to output all compiler warnings
 if (UNIX)
   if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
-    set_target_properties (mesher PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic -DFreeBSD")
+    set_target_properties (trees PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic -DFreeBSD")
   else()
-    set_target_properties (mesher PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic -std=c++0x")
+    set_target_properties (trees PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic -std=c++0x")
   endif()
 endif()
 
 if (APPLE)
-set_target_properties (mesher PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic")
+set_target_properties (trees PROPERTIES COMPILE_FLAGS "-g -Wall -pedantic")
 endif()
 
 if (WIN32)
-set_target_properties (mesher PROPERTIES COMPILE_FLAGS "/W4")
+set_target_properties (trees PROPERTIES COMPILE_FLAGS "/W4")
 endif()
 
 
@@ -72,8 +72,8 @@ if (NOT OPENGL_FOUND)
 endif()
 message(STATUS "Found OpenGL at \"${OPENGL_LIBRARIES}\"")
 
-add_lib_list(mesher "${OPENGL_LIBRARIES}")
-add_lib_list(mesher "${GLUT_LIBRARIES}")
+add_lib_list(trees "${OPENGL_LIBRARIES}")
+add_lib_list(trees "${GLUT_LIBRARIES}")
 
 if (WIN32)
   find_library(GLEW_LIBRARIES glew32 HINT "lib")
@@ -81,7 +81,7 @@ if (WIN32)
     message(FATAL_ERROR "Cannot find GLEW library")
   endif()
   message(STATUS "Found GLEW at \"${GLEW_LIBRARIES}\"")
-  add_lib_list(mesher "${GLEW_LIBRARIES}")
+  add_lib_list(trees "${GLEW_LIBRARIES}")
 endif()
 
 #include_directories(".")
