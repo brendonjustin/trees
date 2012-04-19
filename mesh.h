@@ -137,6 +137,9 @@ private:
   triangleshashtype triangles;
   BoundingBox bbox;
   vphashtype vertex_parents;
+  std::vector<Vertex*> g_vertices;
+  edgeshashtype g_edges;
+  triangleshashtype g_triangles;
 
   int num_boundary_edges;
   int num_crease_edges;

@@ -353,10 +353,10 @@ void Mesh::setupGndTriVBOs() {
   gnd_mesh_tri_verts = new VBOTriVert[num_tris*3];
   gnd_mesh_tri_indices = new VBOTri[num_tris];
   
-  a = Vec3f(0, 0, 0);
-  b = Vec3f(1, 0, 0);
-  c = Vec3f(1, 1, 0);
-  d = Vec3f(0, 1, 0);
+  a = Vec3f(-1, 0, -1);
+  b = Vec3f(1,  0,  1);
+  c = Vec3f(1,  0, -1);
+  d = Vec3f(-1, 0,  1);
   normal = Vec3f(0, 0, 1);
   
   gnd_mesh_tri_verts[0] = VBOTriVert(a,normal);
@@ -365,7 +365,7 @@ void Mesh::setupGndTriVBOs() {
   gnd_mesh_tri_verts[3] = VBOTriVert(d,normal);
 
   gnd_mesh_tri_indices[0] = VBOTri(0, 1, 2);
-  gnd_mesh_tri_indices[1] = VBOTri(2, 0, 3);
+  gnd_mesh_tri_indices[1] = VBOTri(1, 0, 3);
 
   glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
   glBufferData(GL_ARRAY_BUFFER,
@@ -546,6 +546,20 @@ void Mesh::drawVBOs() {
   if (args->wireframe) {
     glDisable(GL_POLYGON_OFFSET_FILL); 
   }
+
+  // now draw the ground
+  glColor3f(0,1,0);
+  glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gnd_mesh_tri_indices_VBO);
+  glDrawElements(GL_TRIANGLES,
+    4*3,
+    GL_UNSIGNED_INT,
+    BUFFER_OFFSET(0));
 
   // =================================
   // draw the different types of edges
