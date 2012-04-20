@@ -12,7 +12,6 @@ class Triangle;
 class ArgParser;
 class Ray;
 class Hit;
-class Camera;
 
 // ======================================================================
 // ======================================================================
@@ -60,6 +59,7 @@ struct VBOTri {
 
 class Mesh
 {
+ public:
   // ========================
   // CONSTRUCTOR & DESTRUCTOR
   Mesh(ArgParser *a) { args = a; }
@@ -120,6 +120,7 @@ class Mesh
  public:
   std::vector<Material*> materials;
   Vec3f background_color;
-  Camera *camera;
  private:
 };
+
+#endif

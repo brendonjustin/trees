@@ -11,7 +11,7 @@ public:
 
   // ========================
   // CONSTRUCTOR & DESTRUCTOR
-  Vertex(int i, const Vec3f &pos) : position(pos) { index = i; s = 0; t = 0; }
+  Vertex(int i, const Vec3f &pos) : position(pos) {index = i;}
   
   // =========
   // ACCESSORS
@@ -19,7 +19,7 @@ public:
   double x() const { return position.x(); }
   double y() const { return position.y(); }
   double z() const { return position.z(); }
-  const Vec3f& get() const { return position; }
+  const Vec3f& getPos() const { return position; }
 
 private:
 

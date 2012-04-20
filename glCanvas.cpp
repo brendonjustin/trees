@@ -1,19 +1,14 @@
 #include "glCanvas.h"
 #include "argparser.h"
-#include "boundingbox.h"
 #include "camera.h"
-#include "radiosity.h"
-#include "raytracer.h"
-#include "photon_mapping.h"
 #include "mesh.h"
-#include "raytree.h"
-#include "utils.h"
 
 // ========================================================
 // static variables of GLCanvas class
 
 ArgParser* GLCanvas::args = NULL;
 Mesh* GLCanvas::mesh = NULL;
+Camera* GLCanvas::camera = NULL;
 
 // State of the mouse cursor
 int GLCanvas::mouseButton = 0;
@@ -34,6 +29,11 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
 
   args = _args;
   mesh = _mesh;
+
+  Vec3f camera_position = Vec3f(0,0,5);
+  Vec3f point_of_interest = Vec3f(0,0,0);
+  Vec3f up = Vec3f(0,1,0);
+  camera = new PerspectiveCamera(camera_position, point_of_interest, up, 20 * M_PI/180.0);
 
   // setup glut stuff
   glutInitWindowSize(args->width, args->height);
@@ -72,13 +72,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
 
   HandleGLError("finished glcanvas initialize");
 
-  /*RayTree::initializeVBOs();
-  if (radiosity) radiosity->initializeVBOs();
-  if (photon_mapping) photon_mapping->initializeVBOs();
-
-  RayTree::setupVBOs();
-  if (radiosity) radiosity->setupVBOs();
-  if (photon_mapping) photon_mapping->setupVBOs();*/
+  mesh->initializeVBOs();
 
   HandleGLError("finished glcanvas initialize");
 
@@ -129,26 +123,20 @@ void GLCanvas::display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Set the camera parameters
-  mesh->camera->glInit(args->width, args->height);
+  camera->glInit(args->width, args->height);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  mesh->camera->glPlaceCamera();
+  camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
-
-  if (args->intersect_backfacing)
-    glDisable(GL_CULL_FACE);
-  else
-    glEnable(GL_CULL_FACE);
 
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   
   //  glCallList(display_list_index);
+  glGetError();
   HandleGLError(); 
 
-  /*radiosity->drawVBOs();
-  photon_mapping->drawVBOs();
-  RayTree::drawVBOs();*/
+  mesh->drawVBOs();
    
   // Swap the back buffer with the front buffer to display
   // the scene
@@ -167,7 +155,7 @@ void GLCanvas::reshape(int w, int h) {
   glViewport(0, 0, (GLsizei)args->width, (GLsizei)args->height);
 
   // Set the camera parameters to reflect the changes
-  mesh->camera->glInit(args->width, args->height);
+  camera->glInit(args->width, args->height);
 }
 
 // ========================================================
@@ -175,7 +163,6 @@ void GLCanvas::reshape(int w, int h) {
 // ========================================================
 
 void GLCanvas::mouse(int button, int /*state*/, int x, int y) {
-  args->raytracing_animation = false;
   // Save the current state of the mouse.  This will be
   // used by the 'motion' function
   mouseButton = button;
@@ -195,14 +182,14 @@ void GLCanvas::motion(int x, int y) {
   // Left button = rotation
   // (rotate camera around the up and horizontal vectors)
   if (mouseButton == GLUT_LEFT_BUTTON) {
-    mesh->camera->rotateCamera(0.005*(mouseX-x), 0.005*(mouseY-y));
+    camera->rotateCamera(0.005*(mouseX-x), 0.005*(mouseY-y));
     mouseX = x;
     mouseY = y;
   }
   // Middle button = translation
   // (move camera perpendicular to the direction vector)
   else if (mouseButton == GLUT_MIDDLE_BUTTON) {
-    mesh->camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
+    camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
     mouseX = x;
     mouseY = y;
   }
@@ -210,9 +197,9 @@ void GLCanvas::motion(int x, int y) {
   // (move camera along the direction vector)
   else if (mouseButton == GLUT_RIGHT_BUTTON) {
     if (controlPressed) {
-      mesh->camera->zoomCamera(mouseY-y);
+      camera->zoomCamera(mouseY-y);
     } else {
-      mesh->camera->dollyCamera(mouseY-y);
+      camera->dollyCamera(mouseY-y);
     }
     mouseX = x;
     mouseY = y;
@@ -227,8 +214,10 @@ void GLCanvas::motion(int x, int y) {
 // ========================================================
 
 void GLCanvas::keyboard(unsigned char key, int x, int y) {
-  args->raytracing_animation = false;
   switch (key) {
+  case 'q': case 'Q':
+    exit(0);
+    break;
   default:
     printf("UNKNOWN KEYBOARD INPUT  '%c'\n", key);
   }

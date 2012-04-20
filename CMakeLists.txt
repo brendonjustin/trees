@@ -11,7 +11,6 @@ add_executable(trees
   edge.cpp
   mesh.cpp
   argparser.h
-  boundingbox.h
   camera.h
   edge.h
   glCanvas.h
@@ -22,6 +21,12 @@ add_executable(trees
   triangle.h
   vectors.h
   vertex.h
+  hit.h
+  ray.h
+  material.cpp
+  material.h
+  image.cpp
+  image.h
 )
 
 

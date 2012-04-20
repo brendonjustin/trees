@@ -28,6 +28,7 @@
 
 class ArgParser;
 class Mesh;
+class Camera;
 
 // ====================================================================
 // NOTE:  All the methods and variables of this class are static
@@ -48,6 +49,7 @@ private:
   // various static variables
   static ArgParser *args;
   static Mesh *mesh;
+  static Camera *camera;
 
   // state of the mouse cursor
   static int mouseButton;

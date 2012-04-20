@@ -9,6 +9,7 @@
 #include "edge.h"
 #include "vertex.h"
 #include "triangle.h"
+#include "argparser.h"
 
 int Triangle::next_triangle_id = 0;
 
@@ -180,12 +181,10 @@ void Mesh::Load(const std::string &input_file) {
       x = atof(token2.c_str());
       Vertex *va = getVertex(a);
       Vertex *vb = getVertex(b);
-      Edge *ab = getMeshEdge(va,vb);
-      Edge *ba = getMeshEdge(vb,va);
+      Edge *ab = getEdge(va,vb);
+      Edge *ba = getEdge(vb,va);
       assert (ab != NULL);
       assert (ba != NULL);
-      ab->setCrease(x);
-      ba->setCrease(x);
     } else if (token == std::string("vt")) {
     } else if (token == std::string("vn")) {
     } else if (token[0] == '#') {
@@ -215,7 +214,6 @@ void Mesh::initializeVBOs() {
   // create a pointer for the vertex & index VBOs
   glGenBuffers(1, &mesh_tri_verts_VBO);
   glGenBuffers(1, &mesh_tri_indices_VBO);
-  glGenBuffers(1, &mesh_verts_VBO);
   glGenBuffers(1, &gnd_mesh_tri_verts_VBO);
   glGenBuffers(1, &gnd_mesh_tri_indices_VBO);
   glGenBuffers(1, &gnd_mesh_verts_VBO);
@@ -276,7 +274,7 @@ void Mesh::setupTriVBOs() {
         } while (triangle != t);
         
         Vec3f normal = normals[0];
-        for (int k = 0; k < normals.size(); k++) {
+        for (unsigned int k = 0; k < normals.size(); k++) {
           normal += normals[k];
         }
         normal.Normalize();
@@ -367,8 +365,8 @@ void Mesh::drawVBOs() {
   HandleGLError("in draw mesh");
 
   // scale it so it fits in the window
-  Vec3f center; bbox.getCenter(center);
-  float s = 1/bbox.maxDim();
+  Vec3f center;
+  float s = 1;
   glScalef(s,s,s);
   glTranslatef(-center.x(),-center.y(),-center.z());
 

@@ -48,7 +48,7 @@ public:
   void setNext(Edge *e) {
     assert (next == NULL);
     assert (e != NULL);
-    assert (face == e->face);
+    assert (triangle == e->triangle);
     next = e;
   }
 

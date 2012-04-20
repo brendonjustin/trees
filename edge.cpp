@@ -21,6 +21,6 @@ Edge::~Edge() {
 }
 
 float Edge::Length() const {
-  Vec3f diff = start_vertex->get() - end_vertex->get();
+  Vec3f diff = start_vertex->getPos() - end_vertex->getPos();
   return diff.Length();
 }
