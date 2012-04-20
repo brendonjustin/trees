@@ -4,10 +4,9 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-
 #include "vectors.h"
+#include "ray.h"
 
-// ====================================================================
 // ====================================================================
 
 class Camera {
@@ -16,6 +15,9 @@ public:
   // CONSTRUCTOR & DESTRUCTOR
   Camera(const Vec3f &c, const Vec3f &poi, const Vec3f &u);
   virtual ~Camera() {}
+
+  // RENDERING
+  virtual Ray generateRay(double x, double y) = 0;
 
   // GL NAVIGATION
   virtual void glInit(int w, int h) = 0;
@@ -63,6 +65,9 @@ public:
 		     const Vec3f &u = Vec3f(0,1,0),
 		     double s=100);  
 
+  // RENDERING
+  Ray generateRay(double x, double y);
+
   // GL NAVIGATION
   void glInit(int w, int h);
   void zoomCamera(double factor);
@@ -85,6 +90,9 @@ public:
 		    const Vec3f &poi = Vec3f(0,0,0), 
 		    const Vec3f &u = Vec3f(0,1,0),
 		    double a = 45);
+
+  // RENDERING
+  Ray generateRay(double x, double y);
 
   // GL NAVIGATION
   void glInit(int w, int h);

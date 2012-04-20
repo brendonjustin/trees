@@ -6,12 +6,11 @@
 //
 
 #include <iostream>
+#include <cassert>
 #include <cmath>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-#include <cassert>
 
 class Matrix;
 
@@ -57,17 +56,6 @@ public:
     data[0] = d0;
     data[1] = d1;
     data[2] = d2; }
-
-  // ----------------
-  // EQUALITY TESTING 
-  int operator==(const Vec3f &V) {
-    return ((data[0] == V.data[0]) &&
-	    (data[1] == V.data[1]) &&
-	    (data[2] == V.data[2])); }
-  int operator!=(const Vec3f &V) {
-    return ((data[0] != V.data[0]) ||
-	    (data[1] != V.data[1]) ||
-	    (data[2] != V.data[2])); }
 
   // ------------------------
   // COMMON VECTOR OPERATIONS
@@ -126,6 +114,8 @@ public:
     Vec3f v3 = v1; v3.Scale(v2.x(),v2.y(),v2.z()); return v3; }
   friend Vec3f operator*(double d, const Vec3f &v1) {
     return v1 * d; }
+  friend Vec3f operator/(const Vec3f &v1, double d) {
+    Vec3f v2 = v1; v2.Scale(1/d); return v2; }
 
   // --------------
   // INPUT / OUTPUT
@@ -188,19 +178,6 @@ public:
     data[1] = d1;
     data[2] = d2;
     data[3] = d3; }
-
-  // ----------------
-  // EQUALITY TESTING
-  int operator==(const Vec4f &V) const {
-    return ((data[0] == V.data[0]) &&
-	    (data[1] == V.data[1]) &&
-	    (data[2] == V.data[2]) &&
-	    (data[3] == V.data[3])); }
-  int operator!=(const Vec4f &V) const {
-    return ((data[0] != V.data[0]) ||
-	    (data[1] != V.data[1]) ||
-	    (data[2] != V.data[2]) ||
-	    (data[3] != V.data[3])); }
 
   // ------------------------
   // COMMON VECTOR OPERATIONS

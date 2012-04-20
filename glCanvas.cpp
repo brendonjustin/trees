@@ -1,19 +1,24 @@
 #include "glCanvas.h"
-#include "mesh.h"
 #include "argparser.h"
+#include "boundingbox.h"
 #include "camera.h"
+#include "radiosity.h"
+#include "raytracer.h"
+#include "photon_mapping.h"
+#include "mesh.h"
+#include "raytree.h"
+#include "utils.h"
 
 // ========================================================
 // static variables of GLCanvas class
 
 ArgParser* GLCanvas::args = NULL;
 Mesh* GLCanvas::mesh = NULL;
-Camera* GLCanvas::camera = NULL;
 
+// State of the mouse cursor
 int GLCanvas::mouseButton = 0;
 int GLCanvas::mouseX = 0;
 int GLCanvas::mouseY = 0;
-
 bool GLCanvas::controlPressed = false;
 bool GLCanvas::shiftPressed = false;
 bool GLCanvas::altPressed = false;
@@ -26,20 +31,15 @@ bool GLCanvas::altPressed = false;
 // ========================================================
 
 void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
+
   args = _args;
   mesh = _mesh;
-
-  Vec3f camera_position = Vec3f(0,0,5);
-  Vec3f point_of_interest = Vec3f(0,0,0);
-  Vec3f up = Vec3f(0,1,0);
-  camera = new PerspectiveCamera(camera_position, point_of_interest, up, 20 * M_PI/180.0);
 
   // setup glut stuff
   glutInitWindowSize(args->width, args->height);
   glutInitWindowPosition(100,100);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
   glutCreateWindow("OpenGL Viewer");
-
   HandleGLError("in glcanvas initialize");
 
 #ifdef _WIN32
@@ -49,7 +49,6 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
       exit(1);
   }
 #endif
-
   // basic rendering 
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
@@ -59,6 +58,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
   GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
   glCullFace(GL_BACK);
   glDisable(GL_CULL_FACE);
 
@@ -68,10 +68,17 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
+  glutIdleFunc(idle);
 
   HandleGLError("finished glcanvas initialize");
 
-  mesh->initializeVBOs();
+  /*RayTree::initializeVBOs();
+  if (radiosity) radiosity->initializeVBOs();
+  if (photon_mapping) photon_mapping->initializeVBOs();
+
+  RayTree::setupVBOs();
+  if (radiosity) radiosity->setupVBOs();
+  if (photon_mapping) photon_mapping->setupVBOs();*/
 
   HandleGLError("finished glcanvas initialize");
 
@@ -79,6 +86,8 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
   glutMainLoop();
 }
 
+
+// ========================================================
 
 void GLCanvas::InitLight() {
   // Set the last component of the position to 0 to indicate
@@ -101,32 +110,45 @@ void GLCanvas::InitLight() {
 
   GLfloat spec_mat[4] = {1,1,1,1};
   float glexponent = 30;
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &glexponent);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_mat);
+  glMaterialfv(GL_FRONT, GL_SHININESS, &glexponent);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, spec_mat);
 
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-  float back_color[] = { 0.0,0.0,1.0,1};
+  float back_color[] = { 0.2,0.8,0.8,1};
   glMaterialfv(GL_BACK, GL_AMBIENT_AND_DIFFUSE, back_color);
   glEnable(GL_LIGHT1);
 }
 
 
-void GLCanvas::display(void)
-{
+void GLCanvas::display(void) {
+  glDrawBuffer(GL_BACK);
+
+  Vec3f bg = mesh->background_color;
   // Clear the display buffer, set it to the background color
-  glClearColor(1,1,1,0);
+  glClearColor(bg.r(),bg.g(),bg.b(),0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Set the camera parameters
+  mesh->camera->glInit(args->width, args->height);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  mesh->camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
-  camera->glPlaceCamera();
+
+  if (args->intersect_backfacing)
+    glDisable(GL_CULL_FACE);
+  else
+    glEnable(GL_CULL_FACE);
 
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   
-  mesh->drawVBOs();
+  //  glCallList(display_list_index);
+  HandleGLError(); 
+
+  /*radiosity->drawVBOs();
+  photon_mapping->drawVBOs();
+  RayTree::drawVBOs();*/
    
   // Swap the back buffer with the front buffer to display
   // the scene
@@ -145,7 +167,7 @@ void GLCanvas::reshape(int w, int h) {
   glViewport(0, 0, (GLsizei)args->width, (GLsizei)args->height);
 
   // Set the camera parameters to reflect the changes
-  camera->glInit(args->width, args->height);
+  mesh->camera->glInit(args->width, args->height);
 }
 
 // ========================================================
@@ -153,6 +175,7 @@ void GLCanvas::reshape(int w, int h) {
 // ========================================================
 
 void GLCanvas::mouse(int button, int /*state*/, int x, int y) {
+  args->raytracing_animation = false;
   // Save the current state of the mouse.  This will be
   // used by the 'motion' function
   mouseButton = button;
@@ -169,28 +192,31 @@ void GLCanvas::mouse(int button, int /*state*/, int x, int y) {
 // ========================================================
 
 void GLCanvas::motion(int x, int y) {
-  // Control or Shift or Alt pressed = zoom
-  // (don't move the camera, just change the angle or image size)
-  if (controlPressed || shiftPressed || altPressed) {
-    camera->zoomCamera(mouseY-y);
-  }
   // Left button = rotation
   // (rotate camera around the up and horizontal vectors)
-  else if (mouseButton == GLUT_LEFT_BUTTON) {
-    camera->rotateCamera(0.005*(mouseX-x), 0.005*(mouseY-y));
+  if (mouseButton == GLUT_LEFT_BUTTON) {
+    mesh->camera->rotateCamera(0.005*(mouseX-x), 0.005*(mouseY-y));
+    mouseX = x;
+    mouseY = y;
   }
   // Middle button = translation
   // (move camera perpendicular to the direction vector)
   else if (mouseButton == GLUT_MIDDLE_BUTTON) {
-    camera->truckCamera(mouseX-x, y-mouseY);
+    mesh->camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
+    mouseX = x;
+    mouseY = y;
   }
   // Right button = dolly or zoom
   // (move camera along the direction vector)
   else if (mouseButton == GLUT_RIGHT_BUTTON) {
-    camera->dollyCamera(mouseY-y);
+    if (controlPressed) {
+      mesh->camera->zoomCamera(mouseY-y);
+    } else {
+      mesh->camera->dollyCamera(mouseY-y);
+    }
+    mouseX = x;
+    mouseY = y;
   }
-  mouseX = x;
-  mouseY = y;
 
   // Redraw the scene with the new camera parameters
   glutPostRedisplay();
@@ -200,33 +226,18 @@ void GLCanvas::motion(int x, int y) {
 // Callback function for keyboard events
 // ========================================================
 
-void GLCanvas::keyboard(unsigned char key, int /*x*/, int /*y*/) {
+void GLCanvas::keyboard(unsigned char key, int x, int y) {
+  args->raytracing_animation = false;
   switch (key) {
-  case 'w':  case 'W':
-    args->wireframe = !args->wireframe;
-    glutPostRedisplay();
-    break;
-  case 'g': case 'G':
-    args->gouraud = !args->gouraud;
-    mesh->setupVBOs();
-    glutPostRedisplay();
-    break;
-  case 's': case 'S':
-    mesh->LoopSubdivision();
-    mesh->setupVBOs();
-    glutPostRedisplay();
-    break;
-  case 'd': case 'D':
-    mesh->Simplification((int)floor(0.9*mesh->numTriangles()));
-    mesh->setupVBOs();
-    glutPostRedisplay();
-    break;
-  case 'q':  case 'Q':
-    exit(0);
-    break;
   default:
-    std::cout << "UNKNOWN KEYBOARD INPUT  '" << key << "'" << std::endl;
+    printf("UNKNOWN KEYBOARD INPUT  '%c'\n", key);
   }
+}
+
+void GLCanvas::idle() {
+  //This is where radiosity->iterate or DrawPixels() is called
+  glEnd();
+  glFlush();
 }
 
 // ========================================================
@@ -248,4 +259,3 @@ int HandleGLError(const std::string &message) {
 
 // ========================================================
 // ========================================================
-

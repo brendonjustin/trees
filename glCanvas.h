@@ -3,7 +3,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cassert>
 #include <string>
 
 // Included files for OpenGL Rendering
@@ -25,10 +24,10 @@
 #endif
 #endif
 
+#include "vectors.h"
 
 class ArgParser;
 class Mesh;
-class Camera;
 
 // ====================================================================
 // NOTE:  All the methods and variables of this class are static
@@ -42,7 +41,6 @@ public:
   // Note that this function will not return but can be
   // terminated by calling 'exit(0)'
   static void initialize(ArgParser *_args, Mesh *_mesh);
-
 private:
 
   static void InitLight();
@@ -50,7 +48,6 @@ private:
   // various static variables
   static ArgParser *args;
   static Mesh *mesh;
-  static Camera* camera;
 
   // state of the mouse cursor
   static int mouseButton;
@@ -66,6 +63,7 @@ private:
   static void mouse(int button, int state, int x, int y);
   static void motion(int x, int y);
   static void keyboard(unsigned char key, int x, int y);
+  static void idle();
 };
 
 // ====================================================================

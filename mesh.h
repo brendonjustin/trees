@@ -2,15 +2,17 @@
 #define MESH_H
 
 #include <vector>
-#include <string>
 #include "vectors.h"
 #include "hash.h"
-#include "boundingbox.h"
-#include "argparser.h"
+#include "material.h"
 
 class Vertex;
 class Edge;
 class Triangle;
+class ArgParser;
+class Ray;
+class Hit;
+class Camera;
 
 // ======================================================================
 // ======================================================================
@@ -56,20 +58,14 @@ struct VBOTri {
   unsigned int verts[3];
 };
 
-// ======================================================================
-// ======================================================================
-// Stores and renders all the vertices, triangles, and edges for a 3D model
-
-class Mesh {
-
-public:
-
+class Mesh
+{
   // ========================
   // CONSTRUCTOR & DESTRUCTOR
   Mesh(ArgParser *a) { args = a; }
   ~Mesh();
   void Load(const std::string &input_file);
-  
+
   // ========
   // VERTICES
   int numVertices() const { return vertices.size(); }
@@ -81,19 +77,12 @@ public:
     assert (v != NULL);
     return v; }
 
-  // ==================================================
-  // PARENT VERTEX RELATIONSHIPS (used for subdivision)
-  // this creates a relationship between 3 vertices (2 parents, 1 child)
-  void setParentsChild(Vertex *p1, Vertex *p2, Vertex *child);
-  // this accessor will find a child vertex (if it exists) when given
-  // two parent vertices
-  Vertex* getChildVertex(Vertex *p1, Vertex *p2) const;
-
   // =====
   // EDGES
   int numEdges() const { return edges.size(); }
   // this efficiently looks for an edge with the given vertices, using a hash table
-  Edge* getMeshEdge(Vertex *a, Vertex *b) const;
+  Edge* getEdge(Vertex *a, Vertex *b) const;
+  const edgeshashtype& getEdges() const { return edges; }
 
   // =========
   // TRIANGLES
@@ -101,10 +90,6 @@ public:
   void addTriangle(Vertex *a, Vertex *b, Vertex *c);
   void removeTriangle(Triangle *t);
 
-  // ===============
-  // OTHER ACCESSORS
-  const BoundingBox& getBoundingBox() const { return bbox; }
-  
   // ===+=====
   // RENDERING
   void initializeVBOs();
@@ -112,21 +97,9 @@ public:
   void drawVBOs();
   void cleanupVBOs();
 
-  // ==========================
-  // MESH PROCESSING OPERATIONS
-  void LoopSubdivision();
-  void Simplification(int target_tri_count);
-
-private:
-
-  // don't use these constructors
-  Mesh(const Mesh &/*m*/) { assert(0); exit(0); }
-  const Mesh& operator=(const Mesh &/*m*/) { assert(0); exit(0); }
-
+ private:
   // helper functions
   void setupTriVBOs();
-  void setupEdgeVBOs();
-  
   void setupGndTriVBOs();
   
   // ==============
@@ -135,34 +108,18 @@ private:
   std::vector<Vertex*> vertices;
   edgeshashtype edges;
   triangleshashtype triangles;
-  BoundingBox bbox;
-  vphashtype vertex_parents;
   std::vector<Vertex*> g_vertices;
   edgeshashtype g_edges;
   triangleshashtype g_triangles;
 
-  int num_boundary_edges;
-  int num_crease_edges;
-  int num_other_edges;
-
   GLuint mesh_tri_verts_VBO;
   GLuint mesh_tri_indices_VBO;
-  GLuint mesh_verts_VBO;
-  GLuint mesh_boundary_edge_indices_VBO;
-  GLuint mesh_crease_edge_indices_VBO;
-  GLuint mesh_other_edge_indices_VBO;
   GLuint gnd_mesh_tri_verts_VBO;
   GLuint gnd_mesh_tri_indices_VBO;
   GLuint gnd_mesh_verts_VBO;
-
+ public:
+  std::vector<Material*> materials;
+  Vec3f background_color;
+  Camera *camera;
+ private:
 };
-
-// ======================================================================
-// ======================================================================
-
-
-#endif
-
-
-
-

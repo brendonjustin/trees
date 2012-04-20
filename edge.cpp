@@ -1,24 +1,16 @@
-#ifndef _EDGE_H_
-#define _EDGE_H_
-
 #include "vertex.h"
 #include "edge.h"
 
-
-// ===========
-// CONSTRUCTOR
+// EDGE CONSTRUCTOR
 Edge::Edge(Vertex *vs, Vertex *ve, Triangle *t) {
   start_vertex = vs;
   end_vertex = ve;
   triangle = t;
   next = NULL;
   opposite = NULL;
-  crease = 0;
 }
 
-
-// ==========
-// DESTRUCTOR
+// EDGE DESTRUCTOR
 Edge::~Edge() { 
   // disconnect from the opposite edge
   if (opposite != NULL)
@@ -28,12 +20,7 @@ Edge::~Edge() {
   // so we don't need to disconnect that
 }
 
-
-// ========
-// ACCESSOR
 float Edge::Length() const {
-  Vec3f diff = start_vertex->getPos() - end_vertex->getPos();
+  Vec3f diff = start_vertex->get() - end_vertex->get();
   return diff.Length();
 }
-
-#endif

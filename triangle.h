@@ -3,6 +3,8 @@
 
 #include "edge.h"
 
+class Material;
+
 // ===========================================================
 // Stores the indices to the 3 vertices of the triangles, 
 // used by the mesh class
@@ -36,7 +38,20 @@ public:
     assert (edge == NULL);
     edge = e;
   }
+  Material* getMaterial()
+  {
+    assert (material != NULL);
+    return material;
+  }
+  void setMaterial(Material* m) {material = m;}
   int getID() { return id; }
+  double get_s(int vert) const {return s[vert];}
+  double get_t(int vert) const {return t[vert];}
+  void setTextureCoordinates(int vert, double _s, double _t)
+  {
+    assert(vert > -1 && vert < 3);
+    s[vert] = _s; t[vert] = _t;
+  }
 
   // NOTE: If you want to modify a triangle, it is recommended that
   // you remove it from the mesh, delete it, create a triangle object
@@ -54,8 +69,17 @@ protected:
   Edge *edge;
   int id;
 
+  //Texture coordinates
+  //s,t[0] are texture coordinates at edge->getStartVertex()
+  //s,t[1] are texture coordinates at edge->getNext()->getStartVertex()
+  //s,t[2] are texture coordinates at edge->getNext()->getNext()->getStartVertex()
+  double s[3],t[3];
+  
   // triangles are indexed starting at 0
   static int next_triangle_id;
+
+  //The material of this triangle
+  Material *material;
 };
 
 // ===========================================================

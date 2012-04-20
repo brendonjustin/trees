@@ -1,14 +1,25 @@
 #include "glCanvas.h"
 
+#include <time.h>
+
+#include "MersenneTwister.h"
 #include <iostream> 
 #include "argparser.h"
 #include "mesh.h"
 
+MTRand GLOBAL_mtrand;
+
 // =========================================
 // =========================================
 
-//THIS IS A COMMENT
 int main(int argc, char *argv[]) {
+
+  // deterministic (repeatable) randomness
+  GLOBAL_mtrand = MTRand(37);
+  // "real" randomness
+  //GLOBAL_mtrand = MTRand((unsigned)time(0));
+  //
+  
   ArgParser args(argc, argv);
   Mesh mesh(&args);
 

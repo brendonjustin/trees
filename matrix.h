@@ -89,20 +89,19 @@ public:
   friend std::ostream& operator<<(std::ostream &ostr, const Matrix &m);
   friend std::istream& operator>>(std::istream &istr, Matrix &m);
 
-private:
-
   // ------------
   // DETERMINANTS
   static double det4x4(double a1, double a2, double a3, double a4, 
-		      double b1, double b2, double b3, double b4, 
-		      double c1, double c2, double c3, double c4, 
-		      double d1, double d2, double d3, double d4);
+		       double b1, double b2, double b3, double b4, 
+		       double c1, double c2, double c3, double c4, 
+		       double d1, double d2, double d3, double d4);
   static double det3x3(double a1,double a2,double a3,
-		      double b1,double b2,double b3,
-		      double c1,double c2,double c3);
+		       double b1,double b2,double b3,
+		       double c1,double c2,double c3);
   static double det2x2(double a, double b,
-		      double c, double d);
+		       double c, double d);
   
+private:
   // --------------
   // REPRESENTATION 
   // column-major order

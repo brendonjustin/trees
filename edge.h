@@ -1,13 +1,14 @@
-#ifndef EDGE_H
-#define EDGE_H
+#ifndef _EDGE_H_
+#define _EDGE_H_
 
 #include <cassert>
+#include <cstdlib>
 
 class Vertex;
 class Triangle;
 
 // ===================================================================
-// half-edge data structure used by the Mesh class
+// half-edge data structure
 
 class Edge { 
 
@@ -27,9 +28,8 @@ public:
   Edge* getOpposite() const {
     // warning!  the opposite edge might be NULL!
     return opposite; }
-  float getCrease() const { return crease; }
   float Length() const;
-  
+
   // =========
   // MODIFIERS
   void setOpposite(Edge *e) {
@@ -48,10 +48,9 @@ public:
   void setNext(Edge *e) {
     assert (next == NULL);
     assert (e != NULL);
-    assert (triangle == e->triangle);
+    assert (face == e->face);
     next = e;
   }
-  void setCrease(float c) { crease = c; }
 
 private:
 
@@ -68,10 +67,9 @@ private:
   Triangle *triangle;
   Edge *opposite;
   Edge *next;
-  // the crease value is an extra field used during subdivision
-  float crease;
 };
 
 // ===================================================================
 
 #endif
+
