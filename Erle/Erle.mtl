@@ -1,0 +1,19 @@
+#Produced by Art of Illusion 2.7, Tue Jul 21 13:58:19 CEST 2009
+newmtl Stamm
+Kd 1 1 1
+map_Kd Erle2.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Blatt1
+Kd 1 1 1
+map_Kd Erle1.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Blatt2
+Kd 1 1 1
+map_Kd Erle3.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
