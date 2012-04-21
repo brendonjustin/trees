@@ -28,18 +28,18 @@ const int Seeder::factorial[] = {
 
 void Seeder::getDistribution(float area, float blockSize, std::vector<int>& numPerBlock)
 {
-  MTRand mtrand = MTRand();
-  double rand = GLOBAL_mtrand.rand();
+  double rand;
   double sum = 0;
   int maxK = 10;
   int i = 0;
   
   for (int a = 0; a < area / blockSize; ++a) {
+    rand = GLOBAL_mtrand.rand();
     sum = 0;
     for (i = 0; i < maxK; ++i) {
       //  two-dimensional poisson distribution substitutes lambda*area
       //  everywhere lambda appears
-      sum += exp(-m_lambda*blockSize)*pow(m_lambda*blockSize, i) / factorial[i];
+      sum += pow(m_lambda, i)*exp(-m_lambda) / factorial[i];
       
       if (sum > rand) {
         break;
