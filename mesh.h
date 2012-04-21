@@ -111,12 +111,15 @@ class Mesh
   std::vector<Vertex*> g_vertices;
   edgeshashtype g_edges;
   triangleshashtype g_triangles;
+  
+  int num_gnd_tris;
 
   GLuint mesh_tri_verts_VBO;
   GLuint mesh_tri_indices_VBO;
   GLuint gnd_mesh_tri_verts_VBO;
   GLuint gnd_mesh_tri_indices_VBO;
   GLuint gnd_mesh_verts_VBO;
+  
  public:
   std::vector<Material*> materials;
   Vec3f background_color;
