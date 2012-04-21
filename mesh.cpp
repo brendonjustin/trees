@@ -57,7 +57,7 @@ Vertex* Mesh::addVertex(const Vec3f &position) {
   return v;
 }
 
-void Mesh::addTriangle(Vertex *a, Vertex *b, Vertex *c) {
+int Mesh::addTriangle(Vertex *a, Vertex *b, Vertex *c) {
   // create the triangle
   Triangle *t = new Triangle();
   // create the edges
@@ -89,6 +89,7 @@ void Mesh::addTriangle(Vertex *a, Vertex *b, Vertex *c) {
   // add the triangle to the master list
   assert (triangles.find(t->getID()) == triangles.end());
   triangles[t->getID()] = t;
+  return t->getID();
 }
 
 
@@ -134,6 +135,10 @@ void Mesh::Load(const std::string &input_file) {
     return;
   }
 
+  // extract the directory from the .obj filename, to use for texture files
+  int last_slash = input_file.rfind("/");
+  std::string directory = input_file.substr(0,last_slash+1);
+
   char line[MAX_CHAR_PER_LINE];
   std::string token, token2;
   float x,y,z;
@@ -141,6 +146,8 @@ void Mesh::Load(const std::string &input_file) {
   int index = 0;
   int vert_count = 0;
   int vert_index = 1;
+  Material *active_material = NULL;
+  std::vector<std::pair<int, int> > textures;
 
   // read in each line of the file
   while (istr.getline(line,MAX_CHAR_PER_LINE)) { 
@@ -153,14 +160,16 @@ void Mesh::Load(const std::string &input_file) {
     ss >> token;
     if (token == "") continue;
 
-    if (token == std::string("usemtl") ||
-	token == std::string("g")) {
+    if (token == std::string("g")) {
       vert_index = 1; 
       index++;
     } else if (token == std::string("v")) {
       vert_count++;
       ss >> x >> y >> z;
       addVertex(Vec3f(x,y,z));
+    } else if (token == std::string("vt")) {
+      ss >> x >> y;
+      textures.push_back(std::make_pair(x,y));
     } else if (token == std::string("f")) {
       a = b = c = -1;
       ss >> a >> b >> c;
@@ -170,7 +179,11 @@ void Mesh::Load(const std::string &input_file) {
       assert (a >= 0 && a < numVertices());
       assert (b >= 0 && b < numVertices());
       assert (c >= 0 && c < numVertices());
-      addTriangle(getVertex(a),getVertex(b),getVertex(c));
+      int id = addTriangle(getVertex(a),getVertex(b),getVertex(c));
+      triangles[id]->setTextureCoordinates(0, textures[a].first, textures[a].second);
+      triangles[id]->setTextureCoordinates(1, textures[b].first, textures[b].second);
+      triangles[id]->setTextureCoordinates(2, textures[c].first, textures[c].second);
+      if (active_material != NULL) triangles[id]->setMaterial(active_material);
     } else if (token == std::string("e")) {
       a = b = -1;
       ss >> a >> b >> token2;
@@ -185,6 +198,28 @@ void Mesh::Load(const std::string &input_file) {
       Edge *ba = getEdge(vb,va);
       assert (ab != NULL);
       assert (ba != NULL);
+    } else if (token == "m") {
+      // this is not standard .obj format!!
+      // materials
+      int m;
+      ss >> m;
+      assert (m >= 0 && m < (int)materials.size());
+      active_material = materials[m];
+    } else if (token == "material") {
+      // this is not standard .obj format!!
+      std::string texture_file = "";
+
+      //Texture
+      istr.getline(line,MAX_CHAR_PER_LINE);
+      std::stringstream ss2;
+      ss2 << line;
+      ss2 >> token;
+      assert (token == "map_Kd");
+      ss2 >> texture_file;
+      // prepend the directory name
+      texture_file = directory + texture_file;
+      
+      materials.push_back(new Material(texture_file,Vec3f(1,1,1),Vec3f(0,0,0),Vec3f(0,0,0),0));
     } else if (token == std::string("vt")) {
     } else if (token == std::string("vn")) {
     } else if (token[0] == '#') {

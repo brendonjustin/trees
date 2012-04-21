@@ -87,7 +87,7 @@ class Mesh
   // =========
   // TRIANGLES
   int numTriangles() const { return triangles.size(); }
-  void addTriangle(Vertex *a, Vertex *b, Vertex *c);
+  int addTriangle(Vertex *a, Vertex *b, Vertex *c);
   void removeTriangle(Triangle *t);
 
   // ===+=====

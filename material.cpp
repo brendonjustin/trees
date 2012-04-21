@@ -66,8 +66,8 @@ GLuint Material::getTextureID() {
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     // to be most compatible, textures should be square and a power of 2
-    assert (image->Width() == image->Height());
-    assert (image->Width() == 256);
+    //assert (image->Width() == image->Height());
+    //assert (image->Width() == 256);
     // build our texture mipmaps
     gluBuild2DMipmaps( GL_TEXTURE_2D, 3, image->Width(), image->Height(),
 		       GL_RGB, GL_UNSIGNED_BYTE, image->getGLPixelData());
