@@ -13,11 +13,12 @@
 #include <utility>  //  pair
 
 class Seeder {
-  double lambda;
+  double m_lambda;
+  static const int factorial[];
   
 public:
-  Seeder(double expectedNum) : lambda(expectedNum) {};
-  void getLocations(float xSize, float ySize, float gridSize, std::vector<std::pair<float, float> >& locs);
+  Seeder(double expectedNum) : m_lambda(expectedNum) {};
+  void getDistribution(float area, float blockSize, std::vector<int>& numPerBlock);
   
 };
 
