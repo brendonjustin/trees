@@ -35,15 +35,16 @@ void Seeder::getDistribution(float area, float blockSize, std::vector<int>& numP
   int i = 0;
   
   for (int a = 0; a < area / blockSize; ++a) {
+    sum = 0;
     for (i = 0; i < maxK; ++i) {
-      //  two-dimensional poisson distribution sibstitutes lambda*area
+      //  two-dimensional poisson distribution substitutes lambda*area
       //  everywhere lambda appears
       sum += exp(-m_lambda*blockSize)*pow(m_lambda*blockSize, i) / factorial[i];
       
       if (sum > rand) {
-        numPerBlock.push_back(i);
         break;
       }
     }
+    numPerBlock.push_back(i);
   }
 }
