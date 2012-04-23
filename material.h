@@ -44,7 +44,7 @@ public:
   const Vec3f& getReflectiveColor() const { return reflectiveColor; }
   const Vec3f& getEmittedColor() const { return emittedColor; }  
   double getRoughness() const { return roughness; } 
-  bool hasTextureMap() const { return (textureFile != ""); } 
+  bool hasTextureMap() const { return (textureFile != std::string("")); } 
   GLuint getTextureID();
 
   // SHADE

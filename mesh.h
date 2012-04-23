@@ -107,7 +107,10 @@ class Mesh
   ArgParser *args;
   std::vector<Vertex*> vertices;
   edgeshashtype edges;
+
+ public:
   triangleshashtype triangles;
+ private:
   std::vector<Vertex*> g_vertices;
   edgeshashtype g_edges;
   triangleshashtype g_triangles;
@@ -120,9 +123,10 @@ class Mesh
   GLuint gnd_mesh_tri_indices_VBO;
   GLuint gnd_mesh_verts_VBO;
   
- public:
   std::vector<Material*> materials;
+ public:
   Vec3f background_color;
+
  private:
 };
 

@@ -16,7 +16,7 @@
 #endif
 
 class Edge;
-class Triangle;
+#include "triangle.h"
 #include "vertex.h"
 
 #define LARGE_PRIME_A 10007

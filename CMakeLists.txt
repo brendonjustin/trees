@@ -27,6 +27,11 @@ add_executable(trees
   material.h
   image.cpp
   image.h
+  view.cpp
+  view.h
+  triangle.cpp
+  seeder.h
+  seeder.cpp
 )
 
 

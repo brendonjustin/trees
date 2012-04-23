@@ -10,11 +10,12 @@
 #ifndef _VIEW_H_
 #define _VIEW_H_
 
-const int NUM_VIEWS = 253;
+const int VIEW_SIZE = 256;
 
 #include "vectors.h"
 #include "mesh.h"
 #include "camera.h"
+#include "hit.h"
 
 //Struct for each texel
 struct texel
@@ -39,13 +40,18 @@ class View
   //Constructors
   View();
   View(Mesh* inmesh);
+  Vec3f color(int i, int j) {return data[i][j].color;}
 
   //General use functions
-  void computeView();
+  void computeView(float angXZ, float angY, int distance);
 
  private:
   //The array of texels
-  texel data[NUM_VIEWS];
+  texel data[VIEW_SIZE][VIEW_SIZE];
+
+  //The point where the tree rests on the ground
+  int basex;
+  int basey;
 
   //A pointer to the mesh this is a view of
   Mesh* mesh;

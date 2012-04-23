@@ -2,6 +2,8 @@
 #include "argparser.h"
 #include "camera.h"
 #include "mesh.h"
+//TEST
+#include "view.h"
 
 // ========================================================
 // static variables of GLCanvas class
@@ -136,7 +138,30 @@ void GLCanvas::display(void) {
   glGetError();
   HandleGLError(); 
 
-  mesh->drawVBOs();
+  //TEST
+  //mesh->drawVBOs();
+  View tview = View(mesh);
+  tview.computeView(0,0,100);
+  
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  int w = glutGet(GLUT_WINDOW_WIDTH);
+  int h = glutGet(GLUT_WINDOW_HEIGHT);
+  gluOrtho2D(0, w, h, 0);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glBegin(GL_POINTS);
+  for (int i = 0; i < 256; i++)
+    {
+      for (int j = 0; j < 256; j++)
+	{
+	  glColor3d(tview.color(i,j).x(), tview.color(i,j).y(), tview.color(i,j).z());
+	  glVertex2i(i,j);
+	}
+    }
+  glEnd();
    
   // Swap the back buffer with the front buffer to display
   // the scene

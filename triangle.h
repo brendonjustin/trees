@@ -3,7 +3,10 @@
 
 #include "edge.h"
 
+class Hit;
+class Ray;
 class Material;
+class Vec3f;
 
 // ===========================================================
 // Stores the indices to the 3 vertices of the triangles, 
@@ -43,6 +46,11 @@ public:
     assert (material != NULL);
     return material;
   }
+  Material* getMaterial() const
+  {
+    assert (material != NULL);
+    return material;
+  }
   void setMaterial(Material* m) {material = m;}
   int getID() { return id; }
   double get_s(int vert) const {return s[vert];}
@@ -52,6 +60,11 @@ public:
     assert(vert > -1 && vert < 3);
     s[vert] = _s; t[vert] = _t;
   }
+
+  bool intersect(const Ray & r, Hit & h) const;
+  bool plane_intersect(const Ray &r, Hit &h) const;
+  Vec3f computeNormal();
+  Vec3f computeNormal() const;
 
   // NOTE: If you want to modify a triangle, it is recommended that
   // you remove it from the mesh, delete it, create a triangle object
