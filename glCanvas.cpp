@@ -4,6 +4,7 @@
 #include "mesh.h"
 //TEST
 #include "view.h"
+#include "octree.h"
 
 // ========================================================
 // static variables of GLCanvas class
@@ -141,7 +142,7 @@ void GLCanvas::display(void) {
   //TEST
   //mesh->drawVBOs();
   View tview = View(mesh);
-  tview.computeView(0,0,100);
+  tview.computeView(3.1415926535/4.0,0,100);
   
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -158,7 +159,7 @@ void GLCanvas::display(void) {
       for (int j = 0; j < 256; j++)
 	{
 	  glColor3d(tview.color(i,j).x(), tview.color(i,j).y(), tview.color(i,j).z());
-	  glVertex2i(i,j);
+	  glVertex2i(256-i,256-j);
 	}
     }
   glEnd();

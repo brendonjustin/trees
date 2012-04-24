@@ -149,7 +149,7 @@ void Mesh::Load(const std::string &input_file) {
   int vert_count = 0;
   int vert_index = 1;
   Material *active_material = NULL;
-  std::vector<std::pair<int, int> > textures;
+  std::vector<std::pair<float, float> > textures;
 
   // read in each line of the file
   while (istr.getline(line,MAX_CHAR_PER_LINE)) { 

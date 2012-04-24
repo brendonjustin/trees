@@ -11,6 +11,7 @@
 
 //TEST
 #include <iostream>
+#include "octree.h"
 
 //Default constructor
 View::View() :
@@ -63,26 +64,42 @@ void View::computeView(float angXZ, float angY, int distance)
   //Make the camera
   OrthographicCamera camera(cameraPos, center, Vec3f(0,1,0), size);
 
+  //TEST
+  Octree tree(Vec3f(-3, -2, -3), Vec3f(3, 6, 3), 200);
+  int j = 0;
+  for (triangleshashtype::iterator i = mesh->triangles.begin(); i != mesh->triangles.end(); i++)
+    {
+      tree.addTriangle(i->second);
+      if (j%10000 == 0) std::cout << j << std::endl;
+      j++;
+    }
+
   //For each texel
   for (int i = 0; i < VIEW_SIZE; i++)
     {
       std::cout << "ROW " << i << std::endl;
       for (int j = 0; j < VIEW_SIZE; j++)
 	{
-	  std::cout << "COLUMN " << j <<std::endl;
-	  
 	  //Generate a ray
 	  Ray r = camera.generateRay(double(i)/double(VIEW_SIZE),
 				     double(j)/double(VIEW_SIZE));
 	  Hit closeHit;
 	  Hit farHit;
-	  
+
+	  //TEST
+	  std::set<Triangle*> potential = tree.getTris(r);
+	  for (std::set<Triangle*>::iterator i = potential.begin(); i != potential.end(); i++)
+	    {
+	      Hit h;
+	      (*i)->intersect(r, h);
+
+	  /*
 	  //For each triangle in the mesh
 	  for (triangleshashtype::iterator k = mesh->triangles.begin(); k != mesh->triangles.end(); k++)
 	    {
 	      //Check for an intersection
 	      Hit h;
-	      k->second->intersect(r, h);
+	      k->second->intersect(r, h);*/
 
 	      //Check for closest hit or furthest hit
 	      if (h.getT() < closeHit.getT()) closeHit = h;
