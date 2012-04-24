@@ -32,8 +32,6 @@ add_executable(trees
   triangle.cpp
   seeder.h
   seeder.cpp
-  octree.cpp
-  octree.h
 )
 
 

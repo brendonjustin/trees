@@ -4,7 +4,6 @@
 #include "mesh.h"
 //TEST
 #include "view.h"
-#include "octree.h"
 
 // ========================================================
 // static variables of GLCanvas class
