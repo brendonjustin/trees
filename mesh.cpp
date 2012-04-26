@@ -502,7 +502,7 @@ void Mesh::drawVBOs() {
       //Select the texture to use
       int a;
       glGetIntegerv(GL_CLIENT_ACTIVE_TEXTURE, &a);
-      glClientActiveTexture(GL_TEXTURE0 + materials[i]->getTextureID());
+      glBindTexture(GL_TEXTURE_2D, materials[i]->getTextureID());
       glColor3f(1,1,1);
       glGetIntegerv(GL_CLIENT_ACTIVE_TEXTURE, &a);
       HandleGLError("Right after texture");
