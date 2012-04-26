@@ -131,7 +131,7 @@ void GLCanvas::display(void) {
   glLoadIdentity();
   camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
-
+  
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
@@ -141,30 +141,33 @@ void GLCanvas::display(void) {
   HandleGLError(); 
 
   //TEST
-  mesh->drawVBOs();
-  /*
-  View tview = View(mesh);
-  tview.computeView(3.1415926535/4.0,0,100);
-  
+  //mesh->drawVBOs();
+  View tview(mesh);
+  tview.computeView(3.1415926535/4.0,3.1415926535/2, 100);
+
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
   int w = glutGet(GLUT_WINDOW_WIDTH);
   int h = glutGet(GLUT_WINDOW_HEIGHT);
-  gluOrtho2D(0, w, h, 0);
+  gluOrtho2D(0, w, 0, h);
+  glClearColor(0,0,0,0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glBegin(GL_POINTS);
-  for (int i = 0; i < 256; i++)
-    {
-      for (int j = 0; j < 256; j++)
-	{
-	  glColor3d(tview.color(i,j).x(), tview.color(i,j).y(), tview.color(i,j).z());
-	  glVertex2i(256-i,256-j);
-	}
-    }
-    glEnd();*/
+  glBindTexture(GL_TEXTURE_2D, tview.texture_());
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0, 0.0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1.0, 0.0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1.0, 1.0);
+  glVertex2i(w, h);
+  glTexCoord2f(0.0, 1.0);
+  glVertex2i(0, h);
+  glEnd();
+  glBindTexture(GL_TEXTURE_2D, 0);
    
   // Swap the back buffer with the front buffer to display
   // the scene

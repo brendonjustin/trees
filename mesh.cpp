@@ -478,7 +478,7 @@ void Mesh::cleanupVBOs() {
   glDeleteBuffers(1, &gnd_mesh_verts_VBO);
 }
 
-void Mesh::drawVBOs() {
+void Mesh::drawVBOs(bool view) {
 
   HandleGLError("in draw mesh");
 
@@ -496,7 +496,7 @@ void Mesh::drawVBOs() {
   for (int i = 0; i < numMaterials(); i++)
     {
       unsigned int num_tris = triangles[i+1].size();
-
+      
       HandleGLError("Right before texture");
       
       //Select the texture to use
@@ -535,6 +535,9 @@ void Mesh::drawVBOs() {
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
+  //
+  if (view) return;
+
   // now draw the ground
   HandleGLError("Before drawing ground");
   glEnable(GL_LIGHTING);
@@ -550,6 +553,9 @@ void Mesh::drawVBOs() {
     num_gnd_tris*3,
     GL_UNSIGNED_INT,
     BUFFER_OFFSET(0));
+
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_VERTEX_ARRAY);
 
   HandleGLError("leaving draw VBOs");
 }

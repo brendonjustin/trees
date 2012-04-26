@@ -63,46 +63,84 @@ void View::computeView(float angXZ, float angY, int distance)
   //Make the camera
   OrthographicCamera camera(cameraPos, center, Vec3f(0,1,0), size);
 
-  //For each texel
-  /*
-  for (int i = 0; i < VIEW_SIZE; i++)
+  // Clear the display buffer, set it to the background color
+  Vec3f bg = mesh->background_color;
+  glClearColor(bg.r(),bg.g(),bg.b(),0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  //Set the camera parameters
+  camera.glInit(VIEW_SIZE, VIEW_SIZE);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  camera.glPlaceCamera();
+
+  //Set the viewport for these renders
+  int oldWidth = glutGet(GLUT_WINDOW_WIDTH);
+  int oldHeight = glutGet(GLUT_WINDOW_HEIGHT);
+  glViewport(0,0,VIEW_SIZE,VIEW_SIZE);
+
+  //Set up OpenGL states
+  glDisable(GL_LIGHTING);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_TEXTURE_2D);
+
+  HandleGLError("Before FBO");
+
+  //Create the color FBO and depth RB
+  GLuint color_FBO;
+  GLuint depth_RB;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, VIEW_SIZE, VIEW_SIZE, 0, GL_RGB, GL_FLOAT, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+    
+  glGenFramebuffers(1, &color_FBO);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, color_FBO);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			 GL_TEXTURE_2D, texture, 0);
+
+  glGenRenderbuffers(1, &depth_RB);
+  glBindRenderbuffer(GL_RENDERBUFFER, depth_RB);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16,
+			VIEW_SIZE, VIEW_SIZE);
+  
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			    GL_RENDERBUFFER, depth_RB);
+
+  //Ensure the FBO set up properly
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-      std::cout << "ROW " << i << std::endl;
-      
-      for (int j = 0; j < VIEW_SIZE; j++)
-	{
-	  if (i == 70) exit(0);
-	  //Generate a ray
-	  Ray r = camera.generateRay(double(i)/double(VIEW_SIZE),
-				     double(j)/double(VIEW_SIZE));
-	  Hit closeHit;
-	  Hit farHit;
-
-	  //For each triangle in the mesh
-	  for (triangleshashtype::iterator k = mesh->triangles.begin(); k != mesh->triangles.end(); k++)
-	    {
-	      //Check for an intersection
-	      Hit h;
-	      k->second->intersect(r, h);
-
-	      //Check for closest hit or furthest hit
-	      if (h.getT() < closeHit.getT()) closeHit = h;
-	      if (h.getT() > farHit.getT() || farHit.getT() == FLT_MAX) farHit = h;
-	    }
-	  
-	  data[i][j].mind = closeHit.getT();
-	  data[i][j].maxd = farHit.getT();
-	  if (closeHit.getMaterial() != NULL)
-	    {
-	      data[i][j].color = closeHit.getMaterial()->getDiffuseColor(closeHit.get_s(), closeHit.get_t());
-	      data[i][j].opacity = 1.0;
-	    }
-	  else
-	    {
-	      data[i][j].color = Vec3f(0,0,0);
-	      data[i][j].opacity = 0;
-	    }
-	}
+      std::cerr << "FBO setup failed\n";
+      exit(0);
     }
-  */
+    
+
+  HandleGLError("After setting up FBO");
+  
+  //Render as usual
+  mesh->drawVBOs(true);
+  
+  //Unbind buffers
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  //Get the texture data
+  float texdata[VIEW_SIZE*VIEW_SIZE*3];
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texdata);
+  
+  //Copy it over to the view data
+  for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
+    {
+      data[i].color = Vec3f(texdata[3*i], texdata[(3*i)+1], texdata[(3*i)+2]);
+    }
+
+  //Reset viewport
+  glViewport(0,0,oldWidth,oldHeight);
+
+  HandleGLError("Leaving computeView");
 }

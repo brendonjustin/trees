@@ -105,7 +105,7 @@ class Mesh
   // RENDERING
   void initializeVBOs();
   void setupVBOs();
-  void drawVBOs();
+  void drawVBOs(bool view = false);
   void cleanupVBOs();
 
  private:

@@ -40,14 +40,18 @@ class View
   //Constructors
   View();
   View(Mesh* inmesh);
-  Vec3f color(int i, int j) {return data[i][j].color;}
+  Vec3f color(int i, int j) {return data[(VIEW_SIZE*i)+j].color;}
+  GLuint texture_() {return texture;}
 
   //General use functions
   void computeView(float angXZ, float angY, int distance);
 
  private:
-  //The array of texels
-  texel data[VIEW_SIZE][VIEW_SIZE];
+  //The array of additional information
+  texel data[VIEW_SIZE*VIEW_SIZE];
+
+  //The texture generated from this view
+  GLuint texture;
 
   //The point where the tree rests on the ground
   int basex;
