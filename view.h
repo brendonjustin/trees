@@ -41,10 +41,11 @@ class View
   View();
   View(Mesh* inmesh);
   Vec3f color(int i, int j) {return data[(VIEW_SIZE*i)+j].color;}
-  GLuint texture_() {return texture;}
+  GLuint textureID() {return texture;}
 
   //General use functions
   void computeView(float angXZ, float angY, int distance);
+  void computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f max);
 
  private:
   //The array of additional information

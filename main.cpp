@@ -6,6 +6,7 @@
 #include <iostream> 
 #include "argparser.h"
 #include "mesh.h"
+#include "hemisphere.h"
 
 MTRand GLOBAL_mtrand;
 
@@ -22,10 +23,11 @@ int main(int argc, char *argv[]) {
   
   ArgParser args(argc, argv);
   Mesh mesh(&args);
+  Hemisphere hemisphere(&mesh, 7);
 
   mesh.Load(args.input_file);
   glutInit(&argc,argv);
-  GLCanvas::initialize(&args,&mesh); 
+  GLCanvas::initialize(&args,&mesh,&hemisphere); 
 
   return 0;
 }

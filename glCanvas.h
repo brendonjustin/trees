@@ -29,6 +29,7 @@
 class ArgParser;
 class Mesh;
 class Camera;
+class Hemisphere;
 
 // ====================================================================
 // NOTE:  All the methods and variables of this class are static
@@ -41,7 +42,7 @@ public:
   // Set up the canvas and enter the rendering loop
   // Note that this function will not return but can be
   // terminated by calling 'exit(0)'
-  static void initialize(ArgParser *_args, Mesh* _mesh);
+  static void initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere);
 private:
 
   static void InitLight();
@@ -50,6 +51,10 @@ private:
   static ArgParser *args;
   static Mesh* mesh;
   static Camera *camera;
+  static Hemisphere* hemisphere;
+
+  //TEST
+  static int viewnum;
 
   // state of the mouse cursor
   static int mouseButton;

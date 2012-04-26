@@ -2,8 +2,11 @@
 #include "argparser.h"
 #include "camera.h"
 #include "mesh.h"
+#include "hemisphere.h"
+
 //TEST
 #include "view.h"
+#include <cmath>
 
 // ========================================================
 // static variables of GLCanvas class
@@ -11,6 +14,10 @@
 ArgParser* GLCanvas::args = NULL;
 Mesh* GLCanvas::mesh = NULL;
 Camera* GLCanvas::camera = NULL;
+Hemisphere* GLCanvas::hemisphere = NULL;
+
+//TEST
+int GLCanvas::viewnum = 0;
 
 // State of the mouse cursor
 int GLCanvas::mouseButton = 0;
@@ -27,10 +34,11 @@ bool GLCanvas::altPressed = false;
 // by calling 'exit(0)'
 // ========================================================
 
-void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh) {
+void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere) {
 
   args = _args;
   mesh = _mesh;
+  hemisphere = _hemisphere;
 
   Vec3f camera_position = Vec3f(0,0,5);
   Vec3f point_of_interest = Vec3f(0,0,0);
@@ -76,8 +84,9 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh) {
   HandleGLError("finished glcanvas initialize");
 
   mesh->initializeVBOs();
+  hemisphere->setup();
 
-  HandleGLError("finished glcanvas initialize");
+  HandleGLError("finished mesh/hemisphere initialize");
 
   // Enter the main rendering loop
   glutMainLoop();
@@ -132,7 +141,7 @@ void GLCanvas::display(void) {
   camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
   
-  glEnable(GL_LIGHTING);
+  glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
   
@@ -142,9 +151,7 @@ void GLCanvas::display(void) {
 
   //TEST
   //mesh->drawVBOs();
-  View tview(mesh);
-  tview.computeView(3.1415926535/4.0,3.1415926535/2, 100);
-
+  
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -156,7 +163,14 @@ void GLCanvas::display(void) {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glBindTexture(GL_TEXTURE_2D, tview.texture_());
+  glBindTexture(GL_TEXTURE_2D, hemisphere->getView(viewnum)->textureID());
+  /*
+  Ray r = camera->generateRay(.5, .5);
+  Vec3f d = r.getDirection() * -1;
+  float thetan;
+  if (d.x() < 0.0001 && d.x() > -0.0001) {thetan = 3.1415926535/2;} else {thetan = atan(d.z()/d.x());}
+  if (camera.getPosition().
+  glBindTexture(GL_TEXTURE_2D, hemisphere->getNearestView(atan(thetan), acos(d.y()))->textureID());*/
   glBegin(GL_QUADS);
   glTexCoord2f(0.0, 0.0);
   glVertex2i(0, 0);
@@ -248,6 +262,18 @@ void GLCanvas::keyboard(unsigned char key, int x, int y) {
   switch (key) {
   case 'q': case 'Q':
     exit(0);
+    break;
+  case ']':
+    viewnum++;
+    if (viewnum == hemisphere->numViews()) viewnum = 0;
+    std::cout << "View " << viewnum << "\n";
+    glutPostRedisplay();
+    break;
+  case '[':
+    viewnum--;
+    if (viewnum == -1) viewnum = hemisphere->numViews() - 1;
+    std::cout << "View " << viewnum << "\n";
+    glutPostRedisplay();
     break;
   default:
     printf("UNKNOWN KEYBOARD INPUT  '%c'\n", key);

@@ -25,30 +25,34 @@ View::View(Mesh* inmesh) :
 }
 
 //Computes a view of the mesh from the given angle and distance
+//This is a simpler set of parameters
 void View::computeView(float angXZ, float angY, int distance)
 {
-  //Create an orthographic camera to look at the model
-  //Find the minimum and maximum values in each direction
-  float xmax = FLT_MIN;
-  float xmin = FLT_MAX;
-  float ymax = FLT_MIN;
-  float ymin = FLT_MAX;
-  float zmax = FLT_MIN;
-  float zmin = FLT_MAX;
-  
+  //Create the min and max vectors
+  Vec3f min(FLT_MAX, FLT_MAX, FLT_MAX);
+  Vec3f max(FLT_MIN, FLT_MIN, FLT_MIN);
+
   for (int i = 0; i < mesh->numVertices(); i++)
     {
-      if (mesh->getVertex(i)->x() > xmax) xmax = mesh->getVertex(i)->x();
-      if (mesh->getVertex(i)->y() > ymax) ymax = mesh->getVertex(i)->y();
-      if (mesh->getVertex(i)->z() > zmax) zmax = mesh->getVertex(i)->z();
-      if (mesh->getVertex(i)->x() < xmin) xmin = mesh->getVertex(i)->x();
-      if (mesh->getVertex(i)->y() < ymin) ymin = mesh->getVertex(i)->y();
-      if (mesh->getVertex(i)->z() < zmin) zmin = mesh->getVertex(i)->z();
+      Vec3f pos = mesh->getVertex(i)->getPos();
+      if (pos.x() > max.x()) max.setx(pos.x());
+      if (pos.y() > max.y()) max.sety(pos.y());
+      if (pos.z() > max.z()) max.setz(pos.z());
+      if (pos.x() < min.x()) min.setx(pos.x());
+      if (pos.y() < min.y()) min.sety(pos.y());
+      if (pos.z() < min.z()) min.setz(pos.z());
     }
+  
+  //Do the actual call
+  computeView(angXZ, angY, distance, min, max);
+}
 
+//Computes a view of the mesh from the given angle and distance
+void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f max)
+{
   //From this, find the center point, base point, and camera direction
-  Vec3f center((xmin+xmax)/2, (ymin+ymax)/2, (zmin+zmax)/2);
-  Vec3f base3d((xmin+xmax)/2, ymin, (zmin+zmax)/2);
+  Vec3f center((min.x()+max.x())/2, (min.y()+max.y())/2, (min.z()+max.z())/2);
+  Vec3f base3d((min.x()+max.x())/2, min.y(), (min.z()+max.z())/2);
   Vec3f cameraDir(cos(angXZ), sin(angY), sin(angXZ));
   cameraDir.Normalize();
 
@@ -57,7 +61,7 @@ void View::computeView(float angXZ, float angY, int distance)
   cameraDir *= -1;
 
   //Find the size of the view as the largest distance in an axis
-  float size = std::max(std::max(xmax-xmin, ymax-ymin), zmax-zmin);
+  float size = std::max(std::max(max.x()-min.x(), max.y()-min.y()), max.z()-min.z());
   size *= 1.1;
 
   //Make the camera
