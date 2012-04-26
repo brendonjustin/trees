@@ -57,6 +57,13 @@ struct VBOTri {
   unsigned int verts[3];
 };
 
+struct VBOTex {
+  VBOTex() {}
+  VBOTex(float u, float v) : s(u),t(v) {}
+  float s,t;
+};
+  
+
 class Mesh
 {
  public:
@@ -68,27 +75,31 @@ class Mesh
 
   // ========
   // VERTICES
-  int numVertices() const { return vertices.size(); }
-  Vertex* addVertex(const Vec3f &pos);
+  int numVertices() const {return vertices[0].size();}
+  Vertex* addVertex(const Vec3f &pos, int mat = -1);
   // look up vertex by index from original .obj file
   Vertex* getVertex(int i) const {
     assert (i >= 0 && i < numVertices());
-    Vertex *v = vertices[i];
+    Vertex *v = vertices[0][i];
     assert (v != NULL);
     return v; }
 
   // =====
   // EDGES
-  int numEdges() const { return edges.size(); }
+  int numEdges() const { return edges[0].size(); }
   // this efficiently looks for an edge with the given vertices, using a hash table
   Edge* getEdge(Vertex *a, Vertex *b) const;
-  const edgeshashtype& getEdges() const { return edges; }
+  const edgeshashtype& getEdges() const { return edges[0]; }
 
   // =========
   // TRIANGLES
-  int numTriangles() const { return triangles.size(); }
-  int addTriangle(Vertex *a, Vertex *b, Vertex *c);
-  void removeTriangle(Triangle *t);
+  int numTriangles() const { return triangles[0].size(); }
+  int addTriangle(Vertex *a, Vertex *b, Vertex *c, int mat = -1);
+  void removeTriangle(Triangle *t, int mat = -1);
+
+  // =====
+  // OTHER
+  int numMaterials() const {return materials.size();}
 
   // ===+=====
   // RENDERING
@@ -99,31 +110,34 @@ class Mesh
 
  private:
   // helper functions
-  void setupTriVBOs();
+  void setupTriVBOs(int mat);
   void setupGndTriVBOs();
   
   // ==============
   // REPRESENTATION
   ArgParser *args;
-  std::vector<Vertex*> vertices;
-  edgeshashtype edges;
+  //Each of the following are to allow for multiple textures in a model
+  //vertices[0], edges[0], and triangles[0] are all of the data for better access
+  std::vector<std::vector<Vertex*> > vertices;
+  std::vector<edgeshashtype> edges;
+  std::vector<Material*> materials;
+  std::vector<triangleshashtype> triangles;
 
- public:
-  triangleshashtype triangles;
- private:
+  std::vector<GLuint> mesh_tri_verts_VBO;
+  std::vector<GLuint> mesh_tri_indices_VBO;
+  std::vector<GLuint> mesh_tri_texcoords_VBO;
+
+  //Ground representation
   std::vector<Vertex*> g_vertices;
   edgeshashtype g_edges;
   triangleshashtype g_triangles;
   
   int num_gnd_tris;
-
-  GLuint mesh_tri_verts_VBO;
-  GLuint mesh_tri_indices_VBO;
+  
   GLuint gnd_mesh_tri_verts_VBO;
   GLuint gnd_mesh_tri_indices_VBO;
   GLuint gnd_mesh_verts_VBO;
   
-  std::vector<Material*> materials;
  public:
   Vec3f background_color;
 

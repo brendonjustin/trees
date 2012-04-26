@@ -27,7 +27,7 @@ bool GLCanvas::altPressed = false;
 // by calling 'exit(0)'
 // ========================================================
 
-void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
+void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh) {
 
   args = _args;
   mesh = _mesh;
@@ -63,6 +63,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh *_mesh) {
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
   glCullFace(GL_BACK);
   glDisable(GL_CULL_FACE);
+  glEnable(GL_TEXTURE_2D);
 
   // Initialize callback functions
   glutMouseFunc(mouse);
@@ -133,13 +134,15 @@ void GLCanvas::display(void) {
 
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_TEXTURE_2D);
   
   //  glCallList(display_list_index);
   glGetError();
   HandleGLError(); 
 
   //TEST
-  //mesh->drawVBOs();
+  mesh->drawVBOs();
+  /*
   View tview = View(mesh);
   tview.computeView(3.1415926535/4.0,0,100);
   
@@ -161,7 +164,7 @@ void GLCanvas::display(void) {
 	  glVertex2i(256-i,256-j);
 	}
     }
-  glEnd();
+    glEnd();*/
    
   // Swap the back buffer with the front buffer to display
   // the scene

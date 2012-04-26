@@ -41,14 +41,14 @@ public:
   // Set up the canvas and enter the rendering loop
   // Note that this function will not return but can be
   // terminated by calling 'exit(0)'
-  static void initialize(ArgParser *_args, Mesh *_mesh);
+  static void initialize(ArgParser *_args, Mesh* _mesh);
 private:
 
   static void InitLight();
 
   // various static variables
   static ArgParser *args;
-  static Mesh *mesh;
+  static Mesh* mesh;
   static Camera *camera;
 
   // state of the mouse cursor

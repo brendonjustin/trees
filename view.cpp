@@ -64,6 +64,7 @@ void View::computeView(float angXZ, float angY, int distance)
   OrthographicCamera camera(cameraPos, center, Vec3f(0,1,0), size);
 
   //For each texel
+  /*
   for (int i = 0; i < VIEW_SIZE; i++)
     {
       std::cout << "ROW " << i << std::endl;
@@ -103,4 +104,5 @@ void View::computeView(float angXZ, float angY, int distance)
 	    }
 	}
     }
+  */
 }
