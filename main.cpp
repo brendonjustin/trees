@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   
   ArgParser args(argc, argv);
   Mesh mesh(&args);
-  Hemisphere hemisphere(&mesh, 7);
+  Hemisphere hemisphere(&mesh, 10, 30);
 
   mesh.Load(args.input_file);
   glutInit(&argc,argv);

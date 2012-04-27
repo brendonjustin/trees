@@ -18,32 +18,52 @@
 //Default constructor
 Hemisphere::Hemisphere() :
   levels(0),
-  mesh(NULL),
-  view(NULL)
+  mesh(NULL)
 {
   //Why would you use this?
+  view.resize(0);
 }
 
 //Regular constructor
-Hemisphere::Hemisphere(Mesh* inmesh, int inlevels) :
+Hemisphere::Hemisphere(Mesh* inmesh, int inlevels, int inpoints) :
   levels(inlevels),
-  mesh(inmesh),
-  view(NULL)
+  basepoints(inpoints),
+  mesh(inmesh)
 {
   //Much better
+  view.resize(inlevels);
+  for (unsigned int i = 0; i < view.size(); i++)
+    {
+      view[i].resize(0);
+    }
 }
 
 //Destructor
 Hemisphere::~Hemisphere()
 {
   //Only delete views if they exist
-  if (view != NULL)
+  for (unsigned int i = 0; i < view.size(); i++)
     {
-      for (int i = 0; i < numViews(); i++)
+      for (unsigned int j = 0; j < view[i].size(); j++)
 	{
-	  delete view[i];
+	  if (view[i][j] != NULL)
+	    {
+	      delete view[i][j];
+	    }
 	}
     }
+}
+
+//Returns the number of views on the hemisphere
+int Hemisphere::numViews()
+{
+  int sum = 0;
+  for (unsigned int i = 0; i < view.size(); i++)
+    {
+      sum += view[i].size();
+    }
+  
+  return sum;
 }
 
 //Initializes the data structure.
@@ -54,17 +74,23 @@ void Hemisphere::setup()
   //First, compute the bounds of the mesh
   computeBounds();
 
-  //Create the array of view pointers
-  view = new View*[numViews()];
+  //Create the views
+  //Cycle over each level
   std::cout << "Before view calculation\n";
-  for (int i = 0; i < numViews(); i++)
+  for (int i = 0; i < levels; i++)
     {
-      //Create the View
-      view[i] = new View(mesh);
+      //Find the number of points at this level
+      float angY = (HEMISPHERE_PI/2)*(float(i)/float(levels-1));
+      if (i == levels-1) angY -= 0.0001;
+      view[i].resize(basepoints, NULL);
 
-      //Compute it
-      Vec3f angles = getAngleFromIndex(i);
-      view[i]->computeView(angles.x(), angles.y(), 100, min, max);
+      //Compute the views
+      for (unsigned int j = 0; j < view[i].size(); j++)
+	{
+	  float angXZ = (HEMISPHERE_PI*2)*(float(j)/float(view[i].size()));
+	  view[i][j] = new View(mesh);
+	  view[i][j]->computeView(angXZ, angY, 100, min, max);
+	}
     }
   std::cout << "After view calculation\n";
 }
@@ -86,58 +112,46 @@ void Hemisphere::computeBounds()
     }
 }
 
-//Returns the number of views at the given level
-int Hemisphere::viewsAtLevel(int l)
-{
-  //Invert l so the lowest number is the top
-  l = levels - l;
-
-  //Return the number
-  if (l == 0) return 1;
-  return std::pow(2, l+1);
-}
-
-//Returns the nearest view
+//Returns the nearest view given the angle to that view
 View* Hemisphere::getNearestView(float angXZ, float angY)
 {
-  //Find the corresponding level for angY
-  int ylevel = angY*((levels)/(HEMISPHERE_PI/2));
+  //Find the corresponding level for angY, rounding to nearest
+  int ylevel = (angY*((levels-1)/(HEMISPHERE_PI/2))) + 0.5;
 
-  //Find the corresponding point for angXZ
-  int xzlevel = angXZ*(viewsAtLevel(ylevel)/(2*HEMISPHERE_PI));
+  //Just make sure it doesn't round too far
+  if (ylevel == levels) ylevel--;
 
-  //Find the corresponding index
-  int index = viewsAtLevel(ylevel-1) + xzlevel;
-  if (index < 0 || index >= numViews())
-    {
-      std::cout << "Bad getNearestView\n";
-      exit(0);
-    }
+  //Find the corresponding point for angXZ, also rounding
+  unsigned int xzlevel = (angXZ*(view[ylevel].size())/(2*HEMISPHERE_PI)) + 0.5;
+
+  //Just make sure it doesn't round too far
+  if (xzlevel == view[ylevel].size()) xzlevel--;
 
   //Return the view at that point
-  return view[index];
+  return view[ylevel][xzlevel];
 }
 
-//Returns a Vec3f where x is the xz angle and y is the y angle
-//Returns the angles that correspond to the index
-Vec3f Hemisphere::getAngleFromIndex(int index)
+//Returns the nearest view given the position of the center
+//and the position of the camera
+View* Hemisphere::getNearestView(Vec3f pos, Vec3f camera)
 {
-  //Find the components of this index
-  int ylevel = levels;
-  int xzlevel = 0;
-  while(index >= viewsAtLevel(ylevel))
-    {
-      index -= viewsAtLevel(ylevel);
-      ylevel--;
-    }
-  xzlevel = index;
+  //Find a vector pointing to the camera from the center
+  Vec3f toCamera = camera - pos;
+  toCamera.Normalize();
 
-  //Find the corresponding angles
-  float angXZ = (2.0*HEMISPHERE_PI*float(xzlevel)) / float(viewsAtLevel(ylevel));
-  float angY = (0.5*HEMISPHERE_PI*float(ylevel)) / float(levels);
+  //Convert this to spherical coordinates
+  Vec3f xzCamera(toCamera.x(), 0, toCamera.z());
+  xzCamera.Normalize();
+  float angXZ = std::acos(xzCamera.x());
+  if (toCamera.z() < 0) angXZ *= -1;
+  float angY = std::asin(toCamera.y());
 
-  //Construct and return a Vec3f
-  return Vec3f(angXZ, angY, 0);
+  //Bound them to the hemisphere
+  while (angXZ < 0) angXZ += 2*HEMISPHERE_PI;
+  if (angY < 0) angY = 0;
+
+  //Get the nearest view
+  return getNearestView(angXZ, angY);
 }
 
 #endif

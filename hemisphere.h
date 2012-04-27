@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <cfloat>
+#include <vector>
 
 const float HEMISPHERE_PI = 3.1415926535;
 
@@ -25,24 +26,27 @@ class Hemisphere
  public:
   //Constructors
   Hemisphere();
-  Hemisphere(Mesh* inmesh, int inlevels);
+  Hemisphere(Mesh* inmesh, int inlevels, int inpoints);
 
   //Destructor
   ~Hemisphere();
 
   //Accessors
-  View* getView(int i) {return view[i];}
-  int numViews() {return std::pow(2, levels+1) - 3;}
+  View* getView(int i, int j) {return view[i][j];}
+  int numViews();
 
   //General use functions
   void setup();
   View* getNearestView(float angXZ, float angY);
+  View* getNearestView(Vec3f pos, Vec3f camera);
   View* getInterpolatedView(float angXZ, float angY);
-  Vec3f getAngleFromIndex(int index);
 
  private:
   //The number of levels of points, including the one at the top
   int levels;
+
+  //The number of points around the base of the hemisphere
+  int basepoints;
 
   //The mesh that this hemisphere surrounds
   Mesh* mesh;
@@ -51,11 +55,10 @@ class Hemisphere
   Vec3f min, max;
 
   //The views themselves
-  View** view;
+  std::vector<std::vector<View*> > view;
 
   //Helper functions
   void computeBounds();
-  int viewsAtLevel(int l);
 };
 
 #endif

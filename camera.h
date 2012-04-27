@@ -19,6 +19,9 @@ public:
   // RENDERING
   virtual Ray generateRay(double x, double y) = 0;
 
+  // ACCESSORS
+  Vec3f getPosition() {return camera_position;}
+
   // GL NAVIGATION
   virtual void glInit(int w, int h) = 0;
   void glPlaceCamera(void);

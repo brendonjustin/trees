@@ -163,14 +163,9 @@ void GLCanvas::display(void) {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  glBindTexture(GL_TEXTURE_2D, hemisphere->getView(viewnum)->textureID());
-  /*
-  Ray r = camera->generateRay(.5, .5);
-  Vec3f d = r.getDirection() * -1;
-  float thetan;
-  if (d.x() < 0.0001 && d.x() > -0.0001) {thetan = 3.1415926535/2;} else {thetan = atan(d.z()/d.x());}
-  if (camera.getPosition().
-  glBindTexture(GL_TEXTURE_2D, hemisphere->getNearestView(atan(thetan), acos(d.y()))->textureID());*/
+  //glBindTexture(GL_TEXTURE_2D, hemisphere->getView(viewnum)->textureID());
+  glBindTexture(GL_TEXTURE_2D,
+		hemisphere->getNearestView(Vec3f(0,0,0), camera->getPosition())->textureID());
   glBegin(GL_QUADS);
   glTexCoord2f(0.0, 0.0);
   glVertex2i(0, 0);

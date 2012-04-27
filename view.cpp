@@ -53,7 +53,7 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   //From this, find the center point, base point, and camera direction
   Vec3f center((min.x()+max.x())/2, (min.y()+max.y())/2, (min.z()+max.z())/2);
   Vec3f base3d((min.x()+max.x())/2, min.y(), (min.z()+max.z())/2);
-  Vec3f cameraDir(cos(angXZ), sin(angY), sin(angXZ));
+  Vec3f cameraDir(cos(angXZ)*(1-sin(angY)), sin(angY), sin(angXZ)*(1-sin(angY)));
   cameraDir.Normalize();
 
   //Find the position of the camera and the direction it looks
