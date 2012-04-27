@@ -151,6 +151,7 @@ void GLCanvas::display(void) {
 
   //TEST
   //mesh->drawVBOs();
+  mesh->drawGndVBOs();
   
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();

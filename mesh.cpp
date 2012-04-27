@@ -538,7 +538,11 @@ void Mesh::drawVBOs(bool view) {
   //
   if (view) return;
 
-  // now draw the ground
+  HandleGLError("leaving draw VBOs");
+}
+
+void Mesh::drawGndVBOs() {
+  // draw the ground
   HandleGLError("Before drawing ground");
   glEnable(GL_LIGHTING);
   glColor3f(0,1,0);
@@ -547,15 +551,13 @@ void Mesh::drawVBOs(bool view) {
   glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
   glEnableClientState(GL_NORMAL_ARRAY);
   glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
-
+  
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gnd_mesh_tri_indices_VBO);
   glDrawElements(GL_TRIANGLES,
-    num_gnd_tris*3,
-    GL_UNSIGNED_INT,
-    BUFFER_OFFSET(0));
-
+                 num_gnd_tris*3,
+                 GL_UNSIGNED_INT,
+                 BUFFER_OFFSET(0));
+  
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
-
-  HandleGLError("leaving draw VBOs");
 }
