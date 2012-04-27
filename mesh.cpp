@@ -386,7 +386,6 @@ void Mesh::setupGndTriVBOs() {
   VBOTriVert* gnd_mesh_tri_verts;
   VBOTri* gnd_mesh_tri_indices;
   unsigned int num_tris = 0;
-//  unsigned int num_tris = 2;
   float area, blockSize;
   int numBlocks, sqrtNumBlocks, numTrees;
   Seeder seeder = Seeder(2);
@@ -397,58 +396,75 @@ void Mesh::setupGndTriVBOs() {
   sqrtNumBlocks = (int)sqrt(numBlocks);
   blockSize = area / numBlocks;
   
-  Vec3f a, b, c, d, normal, baseOffset, cellOffset;
+  Vec3f a, b, c, d, normal, baseOffset, cellOffset, intraCellOffset;
   //  A 1x1 square with the bottom left corner at 0,0
   a = Vec3f(0,  0,  0);
   b = Vec3f(1,  0,  1);
   c = Vec3f(1,  0,  0);
   d = Vec3f(0,  0,  1);
-
-  //  A 2x2 square with the bottom left corner at -1,-1
-//  a = Vec3f(-1, 0, -1);
-//  b = Vec3f(1,  0,  1);
-//  c = Vec3f(1,  0, -1);
-//  d = Vec3f(-1, 0,  1);
   normal = Vec3f(0, 0, 1);
   
   seeder.getDistribution(area, blockSize, dist);
   for (int i = 0; i < numBlocks; ++i) {
-//    std::cout << "num trees: " << dist[i] << std::endl;
     num_tris += 2*dist[i];
   }
   
   gnd_mesh_tri_verts = new VBOTriVert[num_tris*3];
   gnd_mesh_tri_indices = new VBOTri[num_tris];
-  
-  //  Code to draw just 1 square
-  // gnd_mesh_tri_verts[0] = VBOTriVert(a,normal);
-  // gnd_mesh_tri_verts[1] = VBOTriVert(b,normal);
-  // gnd_mesh_tri_verts[2] = VBOTriVert(c,normal);
-  // gnd_mesh_tri_verts[3] = VBOTriVert(d,normal);
-
-  // gnd_mesh_tri_indices[0] = VBOTri(0, 1, 2);
-  // gnd_mesh_tri_indices[1] = VBOTri(1, 0, 3);
 
   //  Draw ground squares at n per block, where n is the number of trees
   //  which would be in that block
   int triCount = 0;
   for (int i = 0; i < numBlocks; ++i) {
-    baseOffset = Vec3f((i % sqrtNumBlocks) * blockSize, 0, (i / sqrtNumBlocks) * blockSize);
+    cellOffset = Vec3f((i % sqrtNumBlocks) * blockSize, 0, (i / sqrtNumBlocks) * blockSize);
     numTrees = dist[i];
     for (int j = 0; j < numTrees; ++j) {
-      cellOffset = j*Vec3f(1,0,1);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + ((cellOffset+a) / numTrees), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + ((cellOffset+b) / numTrees), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + ((cellOffset+c) / numTrees), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + ((cellOffset+d) / numTrees), normal);
+      intraCellOffset = Vec3f(1,1,1) + j*Vec3f(1,0,0) + (j % 2)*Vec3f(0,0,2);
+      
+      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+a), normal);
+      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+b), normal);
+      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+c), normal);
+      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+d), normal);
+      
+//      switch (numTrees) {
+//        case 1:
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
+//          break;
+//          
+//        case 2:
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
+//          break;
+//          
+//        case 3:
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
+//          break;
+//          
+//        case 4:
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
+//          break;
+//          
+//        default:
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
+//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
+//          break;
+//      }
 
       gnd_mesh_tri_indices[triCount / 2 - 2] = VBOTri(triCount - 4, triCount - 3, triCount - 2);
       gnd_mesh_tri_indices[triCount / 2 - 1] = VBOTri(triCount - 3, triCount - 4, triCount - 1);
-      
-//      std::cout << "x: " << (baseOffset + j*(c / numTrees)).x()
-//                << " y: " << (baseOffset + j*(c / numTrees)).y() 
-//                << " z: " << (baseOffset + j*(c / numTrees)).z()
-//                << std::endl;
     }
   }
 
@@ -538,11 +554,7 @@ void Mesh::drawVBOs(bool view) {
   //
   if (view) return;
 
-  HandleGLError("leaving draw VBOs");
-}
-
-void Mesh::drawGndVBOs() {
-  // draw the ground
+  // now draw the ground
   HandleGLError("Before drawing ground");
   glEnable(GL_LIGHTING);
   glColor3f(0,1,0);
@@ -551,13 +563,15 @@ void Mesh::drawGndVBOs() {
   glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
   glEnableClientState(GL_NORMAL_ARRAY);
   glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
-  
+
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gnd_mesh_tri_indices_VBO);
   glDrawElements(GL_TRIANGLES,
-                 num_gnd_tris*3,
-                 GL_UNSIGNED_INT,
-                 BUFFER_OFFSET(0));
-  
+    num_gnd_tris*3,
+    GL_UNSIGNED_INT,
+    BUFFER_OFFSET(0));
+
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
+
+  HandleGLError("leaving draw VBOs");
 }
