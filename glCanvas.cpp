@@ -149,8 +149,7 @@ void GLCanvas::display(void) {
   glGetError();
   HandleGLError(); 
 
-  //TEST
-  //mesh->drawVBOs();
+  //  Draw the ground. Includes visualization of tree placement
   mesh->drawGndVBOs();
   
   glMatrixMode(GL_PROJECTION);

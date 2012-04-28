@@ -9,6 +9,8 @@
 #include "seeder.h"
 #include "utils.h"
 
+#include "mesh.h"
+
 #include <cmath>
 
 //  precomputed factorial values for 0-10
@@ -26,25 +28,54 @@ const int Seeder::factorial[] = {
   3628800,
 };
 
-void Seeder::getDistribution(float area, float blockSize, std::vector<int>& numPerBlock)
+std::vector<int> Seeder::getDistribution(float area, int numBlocks)
 {
   double rand;
   double sum = 0;
   int maxK = 10;
   int i = 0;
+  std::vector<int> pointsPerBlock;
   
-  for (int a = 0; a < area / blockSize; ++a) {
+  for (int a = 0; a < numBlocks; ++a) {
     rand = GLOBAL_mtrand.rand();
     sum = 0;
     for (i = 0; i < maxK; ++i) {
-      //  two-dimensional poisson distribution substitutes lambda*area
-      //  everywhere lambda appears
       sum += pow(m_lambda, i)*exp(-m_lambda) / factorial[i];
       
       if (sum > rand) {
         break;
       }
     }
-    numPerBlock.push_back(i);
+    pointsPerBlock.push_back(i);
   }
+  
+  return pointsPerBlock;
+}
+
+std::vector<Vec3f> Seeder::getTreeLocations(float area, int numBlocks)
+{
+  //  The scene's ground
+  float blockSize;
+  int sqrtNumBlocks, numTrees;
+  Seeder seeder = Seeder(2);
+  std::vector<int> pointsPerBlock;
+  std::vector<Vec3f> locations;
+  Vec3f cellOffset, intraCellOffset;
+  
+  blockSize = area / (float)numBlocks;
+  sqrtNumBlocks = (int)sqrt(numBlocks);
+  
+  pointsPerBlock = this->getDistribution(area, numBlocks);
+  
+  //  Distribute trees at n per block
+  for (int i = 0; i < numBlocks; ++i) {
+    cellOffset = Vec3f((i % sqrtNumBlocks) * blockSize, 0, (i / sqrtNumBlocks) * blockSize);
+    numTrees = pointsPerBlock[i];
+    for (int j = 0; j < numTrees; ++j) {
+      intraCellOffset = Vec3f(1,1,1) + j*Vec3f(1,0,0) + (j % (int)m_lambda)*Vec3f(0,0,(int)m_lambda);
+      locations.push_back(cellOffset + intraCellOffset);
+    }
+  }
+  
+  return locations;
 }

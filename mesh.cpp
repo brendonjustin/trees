@@ -385,18 +385,18 @@ void Mesh::setupGndTriVBOs() {
   //  The scene's ground
   VBOTriVert* gnd_mesh_tri_verts;
   VBOTri* gnd_mesh_tri_indices;
-  unsigned int num_tris = 0;
-  float area, blockSize;
-  int numBlocks, sqrtNumBlocks, numTrees;
+  float area;
+  int numBlocks, numTrees = 0;
   Seeder seeder = Seeder(2);
-  std::vector<int> dist;
+  std::vector<Vec3f> treeLocations;
   
   area = 100;
   numBlocks = 16;
-  sqrtNumBlocks = (int)sqrt(numBlocks);
-  blockSize = area / numBlocks;
   
-  Vec3f a, b, c, d, normal, baseOffset, cellOffset, intraCellOffset;
+  //  the rest of the function is debugging code to render
+  //  squares where trees should be placed
+  
+  Vec3f a, b, c, d, normal;
   //  A 1x1 square with the bottom left corner at 0,0
   a = Vec3f(0,  0,  0);
   b = Vec3f(1,  0,  1);
@@ -404,82 +404,36 @@ void Mesh::setupGndTriVBOs() {
   d = Vec3f(0,  0,  1);
   normal = Vec3f(0, 0, 1);
   
-  seeder.getDistribution(area, blockSize, dist);
-  for (int i = 0; i < numBlocks; ++i) {
-    num_tris += 2*dist[i];
-  }
+  treeLocations = seeder.getTreeLocations(area, numBlocks);
+  numTrees = treeLocations.size();
   
-  gnd_mesh_tri_verts = new VBOTriVert[num_tris*3];
-  gnd_mesh_tri_indices = new VBOTri[num_tris];
+  gnd_mesh_tri_verts = new VBOTriVert[numTrees*4];
+  gnd_mesh_tri_indices = new VBOTri[numTrees*2];
 
-  //  Draw ground squares at n per block, where n is the number of trees
-  //  which would be in that block
-  int triCount = 0;
-  for (int i = 0; i < numBlocks; ++i) {
-    cellOffset = Vec3f((i % sqrtNumBlocks) * blockSize, 0, (i / sqrtNumBlocks) * blockSize);
-    numTrees = dist[i];
-    for (int j = 0; j < numTrees; ++j) {
-      intraCellOffset = Vec3f(1,1,1) + j*Vec3f(1,0,0) + (j % 2)*Vec3f(0,0,2);
-      
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+a), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+b), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+c), normal);
-      gnd_mesh_tri_verts[triCount++] = VBOTriVert(cellOffset + (intraCellOffset+d), normal);
-      
-//      switch (numTrees) {
-//        case 1:
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
-//          break;
-//          
-//        case 2:
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
-//          break;
-//          
-//        case 3:
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
-//          break;
-//          
-//        case 4:
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
-//          break;
-//          
-//        default:
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+a), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+b), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+c), normal);
-//          gnd_mesh_tri_verts[triCount++] = VBOTriVert(baseOffset + (cellOffset+d), normal);
-//          break;
-//      }
-
-      gnd_mesh_tri_indices[triCount / 2 - 2] = VBOTri(triCount - 4, triCount - 3, triCount - 2);
-      gnd_mesh_tri_indices[triCount / 2 - 1] = VBOTri(triCount - 3, triCount - 4, triCount - 1);
-    }
+  //  Draw ground squares
+  int locCounter = 0;
+  for (int i = 0; i < numTrees; ++i) {
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+a, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+b, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+c, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+d, normal);
+    
+    gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
+    gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
   }
 
   glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
   glBufferData(GL_ARRAY_BUFFER,
-         sizeof(VBOTriVert) * num_tris * 3,
+         sizeof(VBOTriVert) * numTrees * 4,
          gnd_mesh_tri_verts,
          GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,gnd_mesh_tri_indices_VBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-         sizeof(VBOTri) * num_tris,
+         sizeof(VBOTri) * numTrees * 2,
          gnd_mesh_tri_indices,
          GL_STATIC_DRAW);
   
-  num_gnd_tris = num_tris;
+  num_gnd_tris = numTrees * 2;
   
   delete [] gnd_mesh_tri_verts;
   delete [] gnd_mesh_tri_indices;
@@ -554,7 +508,11 @@ void Mesh::drawVBOs(bool view) {
   //
   if (view) return;
 
-  // now draw the ground
+  HandleGLError("leaving draw VBOs");
+}
+
+void Mesh::drawGndVBOs() {
+  // draw the ground
   HandleGLError("Before drawing ground");
   glEnable(GL_LIGHTING);
   glColor3f(0,1,0);
@@ -563,15 +521,13 @@ void Mesh::drawVBOs(bool view) {
   glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
   glEnableClientState(GL_NORMAL_ARRAY);
   glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
-
+  
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gnd_mesh_tri_indices_VBO);
   glDrawElements(GL_TRIANGLES,
-    num_gnd_tris*3,
-    GL_UNSIGNED_INT,
-    BUFFER_OFFSET(0));
-
+                 num_gnd_tris*3,
+                 GL_UNSIGNED_INT,
+                 BUFFER_OFFSET(0));
+  
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
-
-  HandleGLError("leaving draw VBOs");
 }

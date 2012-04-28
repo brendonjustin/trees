@@ -9,16 +9,18 @@
 #ifndef trees_seeder_h
 #define trees_seeder_h
 
+#include "vectors.h"
+
 #include <vector>
-#include <utility>  //  pair
 
 class Seeder {
   double m_lambda;
   static const int factorial[];
+  std::vector<int> getDistribution(float area, int numBlocks);
   
 public:
   Seeder(double expectedNum) : m_lambda(expectedNum) {};
-  void getDistribution(float area, float blockSize, std::vector<int>& numPerBlock);
+  std::vector<Vec3f> getTreeLocations(float area, int numBlocks);
   
 };
 
