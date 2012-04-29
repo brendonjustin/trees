@@ -448,7 +448,7 @@ void Mesh::cleanupVBOs() {
   glDeleteBuffers(1, &gnd_mesh_verts_VBO);
 }
 
-void Mesh::drawVBOs(bool view) {
+void Mesh::drawVBOs() {
 
   HandleGLError("in draw mesh");
 
@@ -460,6 +460,7 @@ void Mesh::drawVBOs(bool view) {
 
   //No lighting for rendering views
   glDisable(GL_LIGHTING);
+  glColor3f(1.0,1.0,1.0);
 
   // ======================
   // draw all the triangles
@@ -504,9 +505,6 @@ void Mesh::drawVBOs(bool view) {
       glDisableClientState(GL_VERTEX_ARRAY);
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
-
-  //
-  if (view) return;
 
   HandleGLError("leaving draw VBOs");
 }

@@ -103,13 +103,13 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   glBindTexture(GL_TEXTURE_2D, 0);
     
   glGenFramebuffers(1, &color_FBO);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, color_FBO);
+  glBindFramebuffer(GL_FRAMEBUFFER, color_FBO);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			 GL_TEXTURE_2D, texture, 0);
 
   glGenRenderbuffers(1, &depth_RB);
   glBindRenderbuffer(GL_RENDERBUFFER, depth_RB);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16,
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
 			VIEW_SIZE, VIEW_SIZE);
   
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
@@ -126,22 +126,47 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   HandleGLError("After setting up FBO");
   
   //Render as usual
-  mesh->drawVBOs(true);
-  
-  //Unbind buffers
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glDepthFunc(GL_LESS);
+  mesh->drawVBOs();
 
   //Get the texture data
   float texdata[VIEW_SIZE*VIEW_SIZE*3];
   glBindTexture(GL_TEXTURE_2D, texture);
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texdata);
+
+  //Get the depth data
+  float depthdata[VIEW_SIZE*VIEW_SIZE];
+  glReadPixels(0, 0, VIEW_SIZE, VIEW_SIZE, GL_DEPTH_COMPONENT, GL_FLOAT, depthdata);
   
   //Copy it over to the view data
   for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
     {
       data[i].color = Vec3f(texdata[3*i], texdata[(3*i)+1], texdata[(3*i)+2]);
+      data[i].mind = depthdata[i];
     }
+
+  //Render again, but with depth function set to GL_GREATER for maximum distance
+  glDepthFunc(GL_GREATER);
+  mesh->drawVBOs();
+  glDepthFunc(GL_LESS);
+
+  //Get the new depth data
+  glReadPixels(0, 0, VIEW_SIZE, VIEW_SIZE, GL_DEPTH_COMPONENT, GL_FLOAT, depthdata);
+  
+  //Copy it over to the view data
+  for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
+    {
+      data[i].maxd = depthdata[i];
+    }
+
+  //Unbind buffers
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  //Delete framebuffer and renderbuffer
+  glDeleteFramebuffers(1, &color_FBO);
+  glDeleteRenderbuffers(1, &depth_RB);
 
   //Reset viewport
   glViewport(0,0,oldWidth,oldHeight);

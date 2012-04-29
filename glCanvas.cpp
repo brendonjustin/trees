@@ -141,7 +141,6 @@ void GLCanvas::display(void) {
   camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
   
-  glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
   
@@ -151,7 +150,9 @@ void GLCanvas::display(void) {
 
   //  Draw the ground. Includes visualization of tree placement
   mesh->drawGndVBOs();
-  
+
+  glColor3f(1.0,1.0,1.0);
+  glDisable(GL_LIGHTING);
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -165,7 +166,7 @@ void GLCanvas::display(void) {
   glLoadIdentity();
   //glBindTexture(GL_TEXTURE_2D, hemisphere->getView(viewnum)->textureID());
   glBindTexture(GL_TEXTURE_2D,
-		hemisphere->getNearestView(Vec3f(0,0,0), camera->getPosition())->textureID());
+		hemisphere->getNearestView(Vec3f(0,0,0),camera->getPosition())->textureID());
   glBegin(GL_QUADS);
   glTexCoord2f(0.0, 0.0);
   glVertex2i(0, 0);
