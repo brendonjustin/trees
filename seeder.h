@@ -16,7 +16,7 @@
 class Seeder {
   double m_lambda;
   static const int factorial[];
-  std::vector<int> getDistribution(float area, int numBlocks);
+  std::vector<int> getPoissonDistribution(int numBlocks);
   
 public:
   Seeder(double expectedNum) : m_lambda(expectedNum) {};

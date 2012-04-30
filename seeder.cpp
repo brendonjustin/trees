@@ -28,7 +28,7 @@ const int Seeder::factorial[] = {
   3628800,
 };
 
-std::vector<int> Seeder::getDistribution(float area, int numBlocks)
+std::vector<int> Seeder::getPoissonDistribution(int numBlocks)
 {
   double rand;
   double sum = 0;
@@ -65,7 +65,7 @@ std::vector<Vec3f> Seeder::getTreeLocations(float area, int numBlocks)
   blockSize = area / (float)numBlocks;
   sqrtNumBlocks = (int)sqrt(numBlocks);
   
-  pointsPerBlock = this->getDistribution(area, numBlocks);
+  pointsPerBlock = this->getPoissonDistribution(numBlocks);
   
   //  Distribute trees at n per block
   for (int i = 0; i < numBlocks; ++i) {

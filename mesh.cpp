@@ -388,7 +388,7 @@ void Mesh::setupGndTriVBOs() {
   float area;
   int numBlocks, numTrees = 0;
   Seeder seeder = Seeder(2);
-  std::vector<Vec3f> treeLocations;
+  std::vector<Vec3f> locations;
   
   area = 100;
   numBlocks = 16;
@@ -404,8 +404,8 @@ void Mesh::setupGndTriVBOs() {
   d = Vec3f(0,  0,  1);
   normal = Vec3f(0, 0, 1);
   
-  treeLocations = seeder.getTreeLocations(area, numBlocks);
-  numTrees = treeLocations.size();
+  locations = seeder.getTreeLocations(area, numBlocks);
+  numTrees = locations.size();
   
   gnd_mesh_tri_verts = new VBOTriVert[numTrees*4];
   gnd_mesh_tri_indices = new VBOTri[numTrees*2];
@@ -413,10 +413,10 @@ void Mesh::setupGndTriVBOs() {
   //  Draw ground squares
   int locCounter = 0;
   for (int i = 0; i < numTrees; ++i) {
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+a, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+b, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+c, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(treeLocations[i]+d, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+a, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+b, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+c, normal);
+    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+d, normal);
     
     gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
     gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
