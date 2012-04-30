@@ -17,7 +17,14 @@ float TerrainGenerator::scale = 1.0f;
 
 float TerrainGenerator::getRandomOffset(int depth)
 {
-  return (2*GLOBAL_mtrand.rand() - 1)*scale*pow(2,-ratio);
+  float scaleDown = 1;
+
+  for (int i = 0; i < depth; ++i)
+  {
+    scaleDown *= pow(2,-ratio);
+  }
+  if (GLOBAL_mtrand.rand() > 0.5) scaleDown = -scaleDown;
+  return GLOBAL_mtrand.rand()*scale*scaleDown;
 }
 
 void TerrainGenerator::diamondIteration(std::vector<std::vector<float> >& vec, int count)

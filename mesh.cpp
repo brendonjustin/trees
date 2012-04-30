@@ -394,19 +394,25 @@ void Mesh::setupGndTriVBOs() {
   
   //  Note: numBlocks must be a power of two, squared, i.e. (2^x)^2
   //  Area need not be an integer value
-  numBlocks = pow(pow(2, 4), 2);
-  area = 128;
+  numBlocks = pow(pow(2, 7), 2);
+  area = numBlocks;
+  
+  normal = Vec3f(0, 1, 0);
   
   //  the rest of the function is code to generate ground terrain,
   //  or distribute trees according to generated locations
   if (genTerrain) {
     std::vector<std::vector<float> > heights;
-    Vec3f baseOffset, offset, hVec = Vec3f(0,1,0);
-    float sideLength = area / numBlocks;
+    Vec3f baseOffset, offset, hVec;
+    float sideLength = sqrt(area / numBlocks);
     
     //  Tweak some optional parameters
 //    TerrainGenerator::setRatio(0.5f);
+//    TerrainGenerator::setRatio(1.5f);
+    TerrainGenerator::setRatio(2.0f);
+//    TerrainGenerator::setRatio(2.5f);
 //    TerrainGenerator::setScale(2.0f);
+    TerrainGenerator::setScale(100.0f);
     heights = TerrainGenerator::generate((int)sqrt(numBlocks));
     
     //  A variable sized square with the bottom left corner at 0,0
@@ -414,7 +420,7 @@ void Mesh::setupGndTriVBOs() {
     b = Vec3f(sideLength,   0,  sideLength);
     c = Vec3f(sideLength,   0,  0);
     d = Vec3f(0,            0,  sideLength);
-    normal = Vec3f(0, 0, 1);
+    hVec = Vec3f(0,1,0);
     
     gnd_mesh_tri_verts = new VBOTriVert[numBlocks*4];
     gnd_mesh_tri_indices = new VBOTri[numBlocks*2];
@@ -454,13 +460,13 @@ void Mesh::setupGndTriVBOs() {
     Seeder seeder = Seeder(2);
     std::vector<Vec3f> locations;
     
-    locations = seeder.getTreeLocations(area, numBlocks);
     //  A 1x1 square with the bottom left corner at 0,0
     a = Vec3f(0,  0,  0);
     b = Vec3f(1,  0,  1);
     c = Vec3f(1,  0,  0);
     d = Vec3f(0,  0,  1);
-    normal = Vec3f(0, 0, 1);
+    
+    locations = seeder.getTreeLocations(area, numBlocks);
     
     numTrees = locations.size();
     
