@@ -12,16 +12,17 @@
 
 #include <cmath>
 
-float TerrainGenerator::ratio;
+float TerrainGenerator::ratio = 1.0f;
+float TerrainGenerator::scale = 1.0f;
 
 float TerrainGenerator::getRandomOffset(int depth)
 {
-  return (2*GLOBAL_mtrand.rand() - 1)*pow(2,-ratio);
+  return (2*GLOBAL_mtrand.rand() - 1)*scale*pow(2,-ratio);
 }
 
-void TerrainGenerator::diamondIteration(std::vector<float>& vec, int count)
+void TerrainGenerator::diamondIteration(std::vector<std::vector<float> >& vec, int count)
 {
-  int sideLength = sqrt(vec.size());
+  int sideLength = vec.size();
   int sideLengthZero = sideLength - 1;
   int numSegments = pow(2, count-1);
   int span = sideLengthZero / numSegments;
@@ -38,16 +39,16 @@ void TerrainGenerator::diamondIteration(std::vector<float>& vec, int count)
       y1 = y;
       y2 = y+span;
 
-      avg = vec[x1 + y1*sideLength] + vec[x2 + y1*sideLength] + vec[x2 + y2*sideLength] + vec[x1 + y2*sideLength];
+      avg = vec[x1][y1] + vec[x2][y1] + vec[x2][y2] + vec[x1][y2];
       avg *= 0.25f;
-      vec[x1+halfSpan+sideLength*(y1+halfSpan)] = avg + getRandomOffset(count);
+      vec[x1+halfSpan][y1+halfSpan] = avg + getRandomOffset(count);
     }
   }
 }
 
-void TerrainGenerator::squareIteration(std::vector<float>& vec, int count)
+void TerrainGenerator::squareIteration(std::vector<std::vector<float> >& vec, int count)
 {
-  int sideLength = sqrt(vec.size());
+  int sideLength = vec.size();
   int sideLengthZero = sideLength - 1;
   int numSegments = pow(2, count-1);
   int span = sideLengthZero / numSegments;
@@ -78,64 +79,65 @@ void TerrainGenerator::squareIteration(std::vector<float>& vec, int count)
       uu = y - halfSpan;
       if (uu < 0) uu = sideLengthZero - halfSpan;
 
-      avg = vec[x1 + y1*sideLength] + vec[xHalf + yHalf*sideLength] + vec[x1 + y2*sideLength] + vec[ll + yHalf*sideLength];
+      avg = vec[x1][y1] + vec[xHalf][yHalf] + vec[x1][y2] + vec[ll][yHalf];
       avg *= 0.25f;
-      vec[x1 + yHalf*sideLength] = avg + getRandomOffset(count);
+      vec[x1][yHalf] = avg + getRandomOffset(count);
 
-      avg = vec[x1 + y1*sideLength] + vec[xHalf + uu*sideLength] + vec[x2 + y1*sideLength] + vec[xHalf + yHalf*sideLength];
+      avg = vec[x1][y1] + vec[xHalf][uu] + vec[x2][y1] + vec[xHalf][yHalf];
       avg *= 0.25f;
-      vec[xHalf + y1*sideLength] = avg + getRandomOffset(count);
+      vec[xHalf][y1] = avg + getRandomOffset(count);
 
-      avg = vec[x2 + y1*sideLength] + vec[rr + yHalf*sideLength] + vec[x2 + y2*sideLength] + vec[xHalf + yHalf*sideLength];
+      avg = vec[x2][y1] + vec[rr][yHalf] + vec[x2][y2] + vec[xHalf][yHalf];
       avg *= 0.25f;
-      vec[x2 + yHalf*sideLength] = avg + getRandomOffset(count);
+      vec[x2][yHalf] = avg + getRandomOffset(count);
 
-      avg = vec[x1 + y2*sideLength] + vec[xHalf + yHalf*sideLength] + vec[x2 + y2*sideLength] + vec[xHalf + dd*sideLength];
+      avg = vec[x1][y2] + vec[xHalf][yHalf] + vec[x2][y2] + vec[xHalf][dd];
       avg *= 0.25f;
-      vec[xHalf + y2*sideLength] = avg + getRandomOffset(count);
+      vec[xHalf][y2] = avg + getRandomOffset(count);
     }
   }
-
+  
   //  Set the heights to be equal at the right and left edges,
   //  as well as the top and bottom edges.
-  for (int x = 0; x < sideLengthZero; x += span)
+  for (int x = 0; x < sideLength; x += span)
   {
-    vec[x + sideLengthZero*sideLength] = vec[x];
+    vec[x][sideLengthZero] = vec[x][0];
   }
-  for (int y = 0; y < sideLengthZero; y += span)
+  for (int y = 0; y < sideLength; y += span)
   {
-    vec[sideLengthZero + sideLengthZero*y] = vec[sideLengthZero*y];
+    vec[sideLengthZero][y] = vec[0][y];
   }
 }
 
 //	Generate fractal terrain using the diamond-square algorithm
-std::vector<float> TerrainGenerator::generate(int squaresPerSide)
+std::vector<std::vector<float> > TerrainGenerator::generate(int squaresPerSide)
 {
-  int count, iterations;
-  int pt1, pt2, pt3, pt4;
+  int count, iterations, pointsPerSide;
   int x1, x2, x3, x4;
   int y1, y2, y3, y4;
-  std::vector<float> heights (squaresPerSide*squaresPerSide);
+  pointsPerSide = squaresPerSide + 1;
+  std::vector<std::vector<float> > heights;
+
+  for (int i = 0; i < pointsPerSide; ++i)
+  {
+    std::vector<float> thisVec (pointsPerSide, 0);
+    heights.push_back(thisVec);
+  }
 
   x1 = 0;
   y1 = 0;
-  x2 = squaresPerSide-1;
+  x2 = squaresPerSide;
   y2 = 0;
   x3 = 0;
-  y3 = squaresPerSide-1;
-  x4 = squaresPerSide-1;
-  y4 = squaresPerSide-1;
-
-  pt1 = x1 + y1*squaresPerSide;
-  pt2 = x2 + y2*squaresPerSide;
-  pt3 = x3 + y3*squaresPerSide;
-  pt4 = x4 + y4*squaresPerSide;
+  y3 = squaresPerSide;
+  x4 = squaresPerSide;
+  y4 = squaresPerSide;
 
   //  Initialize the corners to height 0
-  heights[pt1] = heights[pt2] = heights[pt3] = heights[pt4] = 0;
+  heights[x1][y1] = heights[x1][y2] = heights[x2][y2] = heights[x2][y1] = 0;
 
   count = 0;
-  iterations = log(squaresPerSide - 1) / log(2);
+  iterations = log(heights.size() - 1) / log(2);
   while (count++ < iterations) {
     diamondIteration(heights, count);
     squareIteration(heights, count);

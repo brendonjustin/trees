@@ -12,6 +12,7 @@
 #include "argparser.h"
 
 #include "seeder.h"
+#include "terraingenerator.h"
 
 int Triangle::next_triangle_id = 0;
 
@@ -383,60 +384,117 @@ void Mesh::setupTriVBOs(int mat) {
 
 void Mesh::setupGndTriVBOs() {
   //  The scene's ground
+  bool genTerrain = true;
+  bool genTreeDist = false;
+  int numBlocks, numTrees = 0;
+  float area;
+  Vec3f a, b, c, d, normal;
   VBOTriVert* gnd_mesh_tri_verts;
   VBOTri* gnd_mesh_tri_indices;
-  float area;
-  int numBlocks, numTrees = 0;
-  Seeder seeder = Seeder(2);
-  std::vector<Vec3f> locations;
   
-  area = 100;
-  numBlocks = 16;
+  //  Note: numBlocks must be a power of two, squared, i.e. (2^x)^2
+  //  Area need not be an integer value
+  numBlocks = pow(pow(2, 4), 2);
+  area = 128;
   
-  //  the rest of the function is debugging code to render
-  //  squares where trees should be placed
-  
-  Vec3f a, b, c, d, normal;
-  //  A 1x1 square with the bottom left corner at 0,0
-  a = Vec3f(0,  0,  0);
-  b = Vec3f(1,  0,  1);
-  c = Vec3f(1,  0,  0);
-  d = Vec3f(0,  0,  1);
-  normal = Vec3f(0, 0, 1);
-  
-  locations = seeder.getTreeLocations(area, numBlocks);
-  numTrees = locations.size();
-  
-  gnd_mesh_tri_verts = new VBOTriVert[numTrees*4];
-  gnd_mesh_tri_indices = new VBOTri[numTrees*2];
-
-  //  Draw ground squares
-  int locCounter = 0;
-  for (int i = 0; i < numTrees; ++i) {
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+a, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+b, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+c, normal);
-    gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+d, normal);
+  //  the rest of the function is code to generate ground terrain,
+  //  or distribute trees according to generated locations
+  if (genTerrain) {
+    std::vector<std::vector<float> > heights;
+    Vec3f baseOffset, offset, hVec = Vec3f(0,1,0);
+    float sideLength = area / numBlocks;
     
-    gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
-    gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
+    //  Tweak some optional parameters
+//    TerrainGenerator::setRatio(0.5f);
+//    TerrainGenerator::setScale(2.0f);
+    heights = TerrainGenerator::generate((int)sqrt(numBlocks));
+    
+    //  A variable sized square with the bottom left corner at 0,0
+    a = Vec3f(0,            0,  0);
+    b = Vec3f(sideLength,   0,  sideLength);
+    c = Vec3f(sideLength,   0,  0);
+    d = Vec3f(0,            0,  sideLength);
+    normal = Vec3f(0, 0, 1);
+    
+    gnd_mesh_tri_verts = new VBOTriVert[numBlocks*4];
+    gnd_mesh_tri_indices = new VBOTri[numBlocks*2];
+    
+    //  Draw ground squares
+    int locCounter = 0;
+    for (int i = 0; i < sqrt(numBlocks); ++i) {
+      baseOffset = c*i;
+      for (int j = 0; j < sqrt(numBlocks); ++j) {
+        offset = baseOffset + d*j;
+        gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + a + hVec*heights[i][j], normal);
+        gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + b + hVec*heights[i+1][j+1], normal);
+        gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + c + hVec*heights[i+1][j], normal);
+        gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + d + hVec*heights[i][j+1], normal);
+        
+        gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
+        gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
+      }
+    }
+    
+    glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(VBOTriVert) * numBlocks * 4,
+                 gnd_mesh_tri_verts,
+                 GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,gnd_mesh_tri_indices_VBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(VBOTri) * numBlocks * 2,
+                 gnd_mesh_tri_indices,
+                 GL_STATIC_DRAW);
+    
+    num_gnd_tris = numBlocks * 2;
+    
+    delete [] gnd_mesh_tri_verts;
+    delete [] gnd_mesh_tri_indices;
+  } else if (genTreeDist) {
+    Seeder seeder = Seeder(2);
+    std::vector<Vec3f> locations;
+    
+    locations = seeder.getTreeLocations(area, numBlocks);
+    //  A 1x1 square with the bottom left corner at 0,0
+    a = Vec3f(0,  0,  0);
+    b = Vec3f(1,  0,  1);
+    c = Vec3f(1,  0,  0);
+    d = Vec3f(0,  0,  1);
+    normal = Vec3f(0, 0, 1);
+    
+    numTrees = locations.size();
+    
+    gnd_mesh_tri_verts = new VBOTriVert[numTrees*4];
+    gnd_mesh_tri_indices = new VBOTri[numTrees*2];
+    
+    //  Draw ground squares
+    int locCounter = 0;
+    for (int i = 0; i < numTrees; ++i) {
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+a, normal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+b, normal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+c, normal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(locations[i]+d, normal);
+      
+      gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
+      gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
+    }
+    
+    glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(VBOTriVert) * numTrees * 4,
+                 gnd_mesh_tri_verts,
+                 GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,gnd_mesh_tri_indices_VBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(VBOTri) * numTrees * 2,
+                 gnd_mesh_tri_indices,
+                 GL_STATIC_DRAW);
+    
+    num_gnd_tris = numTrees * 2;
+    
+    delete [] gnd_mesh_tri_verts;
+    delete [] gnd_mesh_tri_indices;
   }
-
-  glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
-  glBufferData(GL_ARRAY_BUFFER,
-         sizeof(VBOTriVert) * numTrees * 4,
-         gnd_mesh_tri_verts,
-         GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,gnd_mesh_tri_indices_VBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-         sizeof(VBOTri) * numTrees * 2,
-         gnd_mesh_tri_indices,
-         GL_STATIC_DRAW);
-  
-  num_gnd_tris = numTrees * 2;
-  
-  delete [] gnd_mesh_tri_verts;
-  delete [] gnd_mesh_tri_indices;
 }
 
 void Mesh::cleanupVBOs() {

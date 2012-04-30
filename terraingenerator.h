@@ -14,13 +14,15 @@
 //	Based on pseudocode from http://gameprogrammer.com/fractal.html
 class TerrainGenerator {
   static float ratio;
+  static float scale;
   static float getRandomOffset(int);
-  static void diamondIteration(std::vector<float>&, int);
-  static void squareIteration(std::vector<float>&, int);
+  static void diamondIteration(std::vector<std::vector<float> >&, int);
+  static void squareIteration(std::vector<std::vector<float> >&, int);
 
 public:
   static void setRatio(float newRatio) { ratio = newRatio; };
-  static std::vector<float> generate(int squaresPerSide);
+  static void setScale(float newScale) { scale = newScale; };
+  static std::vector<std::vector<float> > generate(int squaresPerSide);
   
 };
 
