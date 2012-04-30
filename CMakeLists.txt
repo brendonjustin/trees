@@ -34,6 +34,8 @@ add_executable(trees
   seeder.cpp
   hemisphere.h
   hemisphere.cpp
+  terraingenerator.h
+  terraingenerator.cpp
 )
 
 

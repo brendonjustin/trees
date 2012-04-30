@@ -3,7 +3,7 @@
 //  trees
 //
 //  Created by Brendon Justin on 4/21/12.
-//  Copyright (c) 2012 Naga Softworks, LLC. All rights reserved.
+//  Copyright (c) 2012 Brendon Justin. All rights reserved.
 //
 
 #include "seeder.h"
