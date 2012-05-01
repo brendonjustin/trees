@@ -1,19 +1,28 @@
 #include "forest.h"
+#include "seeder.h"
 
 #include "argparser.h"
+#include "mesh.h"
 #include "terraingenerator.h"
 
 #include <numeric>
+
+// helper for VBOs
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 Forest::~Forest() {
 	cleanupVBOs();
 }
 
+//  TODO: fix for many trees
 void Forest::initializeVBOs() {
   // create a pointer for the vertex & index VBOs
-  glGenBuffers(1, &mesh_tri_verts_VBO[0]);
-  glGenBuffers(1, &mesh_tri_indices_VBO[0]);
-  glGenBuffers(1, &mesh_tri_texcoords_VBO[0]);
+  glGenBuffers(1, &forest_tri_verts_VBO[0]);
+  glGenBuffers(1, &forest_tri_indices_VBO[0]);
+  glGenBuffers(1, &forest_tri_texcoords_VBO[0]);
+  glGenBuffers(1, &gnd_mesh_tri_verts_VBO);
+  glGenBuffers(1, &gnd_mesh_tri_indices_VBO);
+  glGenBuffers(1, &gnd_mesh_verts_VBO);
   setupVBOs();
 }
 
@@ -29,10 +38,10 @@ void Forest::setupVBOs() {
   Vec3f aT, bT, cT, dT, treeNormal;
   Vec3f aG, bG, cG, dG, gndNormal;
   Vec3f baseOffset, offset, hVec;
-  Vec3f baseTreeLoc, treeHeight;
+  Vec3f baseTreeLoc, treeHeight, treeLoc;
 
   VBOTriVert* forest_tri_verts;
-  VBOTri* forest_tri_indices;
+  VBOQuad* forest_tri_indices;
   VBOTriVert* gnd_mesh_tri_verts;
   VBOTri* gnd_mesh_tri_indices;
 
@@ -87,27 +96,34 @@ void Forest::setupVBOs() {
   int countTrees = 0;
   int blockNumber = 0;
   for (int i = 0; i < sqrt(numBlocks); ++i) {
-    baseOffset = c*i;
+    baseOffset = cG*i;
     for (int j = 0; j < sqrt(numBlocks); ++j) {
-      offset = baseOffset + d*j;
+      offset = baseOffset + dG*j;
       treeLoc = Vec3f(0,0,0);
 
-      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + aG + hVec*heights[i][j], normal);
-      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + bG + hVec*heights[i+1][j+1], normal);
-      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + cG + hVec*heights[i+1][j], normal);
-      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + dG + hVec*heights[i][j+1], normal);
+      //  Add a ground square
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + aG + hVec*heights[i][j], gndNormal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + bG + hVec*heights[i+1][j+1], gndNormal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + cG + hVec*heights[i+1][j], gndNormal);
+      gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + dG + hVec*heights[i][j+1], gndNormal);
       gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
       gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
 
+      //  Create the trees in this ground square
       blockNumber = i*sqrt(numBlocks) + j;
       for (int k = 0; k < treeLocations[blockNumber].size(); ++k)
       {
         treeLoc = treeLocations[countTrees][k];
-        treeHeight = (treeLoc.x - gnd_mesh_tri_verts[locCounter-1].x).length()*(treeLoc.z - gnd_mesh_tri_verts[locCounter-1].z).length() * gnd_mesh_tri_verts[locCounter-1].y;
-        treeHeight += (treeLoc.x - gnd_mesh_tri_verts[locCounter-2].x).length()*(treeLoc.z - gnd_mesh_tri_verts[locCounter-2].z).length() * gnd_mesh_tri_verts[locCounter-2].y;
-        treeHeight += (treeLoc.x - gnd_mesh_tri_verts[locCounter-3].x).length()*(treeLoc.z - gnd_mesh_tri_verts[locCounter-3].z).length() * gnd_mesh_tri_verts[locCounter-3].y;
-        treeHeight += (treeLoc.x - gnd_mesh_tri_verts[locCounter-4].x).length()*(treeLoc.z - gnd_mesh_tri_verts[locCounter-4].z).length() * gnd_mesh_tri_verts[locCounter-4].y;
-        treeHeight = hvec*treeHeight.y;
+        a1 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-1].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-1].z) * gnd_mesh_tri_verts[locCounter-1].y;
+        a2 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-2].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-2].z) * gnd_mesh_tri_verts[locCounter-2].y;
+        a3 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-3].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-3].z) * gnd_mesh_tri_verts[locCounter-3].y;
+        a4 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-4].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-4].z) * gnd_mesh_tri_verts[locCounter-4].y;
+        
+        treeHeight = Vec3f(gnd_mesh_tri_verts[locCounter-1].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a1;
+        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-2].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a2;
+        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-3].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a3;
+        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-4].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a4;
+        treeHeight = hVec*treeHeight.y();
         treeLoc += treeHeight;
 
         forest_tri_verts[countTrees*4] = VBOTriVert(treeLoc + aT, treeNormal);
@@ -115,7 +131,7 @@ void Forest::setupVBOs() {
         forest_tri_verts[countTrees*4 + 2] = VBOTriVert(treeLoc + cT, treeNormal);
         forest_tri_verts[countTrees*4 + 3] = VBOTriVert(treeLoc + dT, treeNormal);
         
-        forest_tri_indices[countTrees++] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);
+        forest_tri_indices[countTrees++] = VBOQuad(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);
       }
     }
   }
@@ -131,16 +147,18 @@ void Forest::setupVBOs() {
                gnd_mesh_tri_indices,
                GL_STATIC_DRAW);
   
-  glBindBuffer(GL_ARRAY_BUFFER,forest_tri_verts_VBO);
-  glBufferData(GL_ARRAY_BUFFER,
-               sizeof(VBOTriVert) * numBlocks * 4,
-               forest_tri_verts,
-               GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,forest_tri_indices_VBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               sizeof(VBOQuad) * numBlocks * 2,
-               forest_tri_indices,
-               GL_STATIC_DRAW);
+  for (int i = 0; i < forest_tri_verts_VBO.size(); ++i) {
+    glBindBuffer(GL_ARRAY_BUFFER,forest_tri_verts_VBO[i]);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(VBOTriVert) * numBlocks * 4,
+                 forest_tri_verts,
+                 GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,forest_tri_indices_VBO[i]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(VBOQuad) * numBlocks * 2,
+                 forest_tri_indices,
+                 GL_STATIC_DRAW);
+  }
   
   delete [] gnd_mesh_tri_verts;
   delete [] gnd_mesh_tri_indices;
@@ -151,16 +169,18 @@ void Forest::setupVBOs() {
   num_trees = numTrees;
 }
 
-void Mesh::cleanupVBOs() {
-  glDeleteBuffers(1, &forest_tri_verts_VBO);
-  glDeleteBuffers(1, &forest_tri_indices_VBO);
-  glDeleteBuffers(1, &forest_tri_texcoords_VBO);
+void Forest::cleanupVBOs() {
+  for (int i = 0; i < forest_tri_verts_VBO.size(); ++i) {
+    glDeleteBuffers(1, &forest_tri_verts_VBO[i]);
+    glDeleteBuffers(1, &forest_tri_indices_VBO[i]);
+    glDeleteBuffers(1, &forest_tri_texcoords_VBO[i]);
+  }
   glDeleteBuffers(1, &gnd_mesh_tri_verts_VBO);
   glDeleteBuffers(1, &gnd_mesh_tri_indices_VBO);
   glDeleteBuffers(1, &gnd_mesh_verts_VBO);
 }
 
-void Mesh::drawVBOs() {
+void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
@@ -182,17 +202,19 @@ void Mesh::drawVBOs() {
   glDisableClientState(GL_VERTEX_ARRAY);
 
   //  Trees
-  glBindBuffer(GL_ARRAY_BUFFER, forest_tri_verts_VBO);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, forest_tri_indices_VBO);
-  glDrawElements(GL_QUADS,
-                 num_trees*4,
-                 GL_UNSIGNED_INT,
-                 BUFFER_OFFSET(0));
+  for (int i = 0; i < forest_tri_verts_VBO.size(); ++i) {
+    glBindBuffer(GL_ARRAY_BUFFER, forest_tri_verts_VBO[i]);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, forest_tri_indices_VBO[i]);
+    glDrawElements(GL_QUADS,
+                   num_trees*4,
+                   GL_UNSIGNED_INT,
+                   BUFFER_OFFSET(0));
+  }
   
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
