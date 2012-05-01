@@ -415,7 +415,7 @@ void Mesh::setupGndTriVBOs() {
     TerrainGenerator::setScale(100.0f);
     heights = TerrainGenerator::generate((int)sqrt(numBlocks));
     
-    //  A variable sized square with the bottom left corner at 0,0
+    //  A variable sized horizontal square with the bottom left corner at 0,0
     a = Vec3f(0,            0,  0);
     b = Vec3f(sideLength,   0,  sideLength);
     c = Vec3f(sideLength,   0,  0);
@@ -460,13 +460,13 @@ void Mesh::setupGndTriVBOs() {
     Seeder seeder = Seeder(2);
     std::vector<Vec3f> locations;
     
-    //  A 1x1 square with the bottom left corner at 0,0
+    //  A 1x1 horizontal square with the bottom left corner at 0,0
     a = Vec3f(0,  0,  0);
     b = Vec3f(1,  0,  1);
     c = Vec3f(1,  0,  0);
     d = Vec3f(0,  0,  1);
     
-    locations = seeder.getTreeLocations(area, numBlocks);
+    // locations = seeder.getTreeLocations(area, numBlocks);
     
     numTrees = locations.size();
     

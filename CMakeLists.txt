@@ -30,10 +30,12 @@ add_executable(trees
   view.cpp
   view.h
   triangle.cpp
-  seeder.h
-  seeder.cpp
+  forest.h
+  forest.cpp
   hemisphere.h
   hemisphere.cpp
+  seeder.h
+  seeder.cpp
   terraingenerator.h
   terraingenerator.cpp
 )

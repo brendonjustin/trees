@@ -52,18 +52,18 @@ std::vector<int> Seeder::getPoissonDistribution(int numBlocks)
   return pointsPerBlock;
 }
 
-std::vector<Vec3f> Seeder::getTreeLocations(float area, int numBlocks)
+std::vector<std::vector<Vec3f> > Seeder::getTreeLocations(float area, int numBlocks)
 {
   //  The scene's ground
   float blockSize;
   int sqrtNumBlocks, numTrees;
   Seeder seeder = Seeder(2);
   std::vector<int> pointsPerBlock;
-  std::vector<Vec3f> locations;
   Vec3f cellOffset, intraCellOffset;
   
   blockSize = area / (float)numBlocks;
   sqrtNumBlocks = (int)sqrt(numBlocks);
+  std::vector<std::vector<Vec3f> > locations (numBlocks);
   
   pointsPerBlock = this->getPoissonDistribution(numBlocks);
   
@@ -73,7 +73,7 @@ std::vector<Vec3f> Seeder::getTreeLocations(float area, int numBlocks)
     numTrees = pointsPerBlock[i];
     for (int j = 0; j < numTrees; ++j) {
       intraCellOffset = Vec3f(1,1,1) + j*Vec3f(1,0,0) + (j % (int)m_lambda)*Vec3f(0,0,(int)m_lambda);
-      locations.push_back(cellOffset + intraCellOffset);
+      locations[i].push_back(cellOffset + intraCellOffset);
     }
   }
   

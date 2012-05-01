@@ -24,6 +24,9 @@ public:
         width = height = atoi(argv[i]);
       } else if (argv[i] == std::string("-gouraud")) {
         gouraud = true;
+      } else if (argv[i] == std::string("-trees")) {
+        i++; assert (i < argc); 
+        trees = atoi(argv[i]);
       } else {
         printf ("whoops error with command line argument %d: '%s'\n",i,argv[i]);
         assert(0);
@@ -35,6 +38,7 @@ public:
     width = 500;
     height = 500;
     gouraud = false;
+    trees = 10;
   }
 
   // ==============
@@ -44,6 +48,7 @@ public:
   int width;
   int height;
   bool gouraud;
+  int trees;
   MTRand mtrand;
 
 };

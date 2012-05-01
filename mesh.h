@@ -57,6 +57,17 @@ struct VBOTri {
   unsigned int verts[3];
 };
 
+struct VBOQuad {
+  VBOQuad() {}
+  VBOQuad(unsigned int a, unsigned int b, unsigned int c, unsigned int d) {
+    verts[0] = a;
+    verts[1] = b;
+    verts[2] = c;
+    verts[3] = d;
+  }
+  unsigned int verts[4];
+};
+
 struct VBOTex {
   VBOTex() {}
   VBOTex(float u, float v) : s(u),t(v) {}
