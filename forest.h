@@ -5,12 +5,14 @@
 #include "glCanvas.h"
 #include <vector>
 
+class Hemisphere;
+
 class Forest
 {
  public:
   // ========================
   // CONSTRUCTOR & DESTRUCTOR
-  Forest(ArgParser *a) : args(a), treeSize(0) { };
+  Forest(ArgParser *a, Hemisphere* h);
   ~Forest();
 
   // ===+=====
@@ -26,22 +28,27 @@ class Forest
   // ==============
   // REPRESENTATION
   ArgParser *args;
-  
-  std::vector<GLuint> forest_tri_verts_VBO;
-  std::vector<GLuint> forest_tri_indices_VBO;
-  std::vector<GLuint> forest_tri_texcoords_VBO;
 
-  std::vector<std::vector<float> > terrainHeights;
+  Hemisphere *hemisphere;
+
+  float area;
+  int num_blocks;
+  int num_gnd_tris;
+  int num_trees;
+  int tree_size;
+
+  std::vector<std::vector<Vec3f> > tree_locations;
+  
+  std::vector<GLuint> forest_quad_verts_VBO;
+  std::vector<GLuint> forest_quad_indices_VBO;
+  std::vector<GLuint> forest_quad_texcoords_VBO;
+
+  std::vector<std::vector<float> > terrain_heights;
 
   //Ground representation
-  int num_gnd_tris;
-  
   GLuint gnd_mesh_tri_verts_VBO;
   GLuint gnd_mesh_tri_indices_VBO;
   GLuint gnd_mesh_verts_VBO;
-
-  int num_trees;
-  int treeSize;
 };
 
 #endif
