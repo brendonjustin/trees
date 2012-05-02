@@ -18,7 +18,7 @@ Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h),
                                               tree_buffer_set(false) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 4), 2);
+  num_blocks = pow(pow(2, 5), 2);
   area = num_blocks * tree_size * 6;
   
   //  For drawing trees
