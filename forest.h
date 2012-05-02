@@ -21,6 +21,8 @@ class Forest
   void setupVBOs();
   void drawVBOs();
   void cleanupVBOs();
+  void setCameraPosition(Vec3f cameraPos);
+  void cameraMoved(Vec3f cameraPos);
 
  private:
   // helper functions
@@ -37,13 +39,14 @@ class Forest
   int num_trees;
   int tree_size;
 
+  Vec3f camera_pos;
+
   std::vector<std::vector<Vec3f> > tree_locations;
   
   std::vector<GLuint> forest_quad_verts_VBO;
   std::vector<GLuint> forest_quad_indices_VBO;
   std::vector<GLuint> forest_quad_texcoords_VBO;
-
-  std::vector<std::vector<float> > terrain_heights;
+  std::vector<GLuint> forest_quad_textures;
 
   //Ground representation
   GLuint gnd_mesh_tri_verts_VBO;

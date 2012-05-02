@@ -71,7 +71,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
   glEnable(GL_NORMALIZE);
   glShadeModel(GL_SMOOTH);
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-  GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+  GLfloat ambient[] = { 0.7, 0.7, 0.7, 1.0 };
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
@@ -92,9 +92,11 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
 
   mesh->initializeVBOs();
   hemisphere->setup();
+
+  forest->setCameraPosition(camera->getPosition());
   forest->initializeVBOs();
 
-  HandleGLError("finished mesh, hemisphere, and forest initialize");
+  HandleGLError("finished mesh, hemisphere, and forest initialization");
 
   // Enter the main rendering loop
   glutMainLoop();
@@ -137,6 +139,7 @@ void GLCanvas::InitLight() {
 void GLCanvas::display(void) {
   glDrawBuffer(GL_BACK);
 
+  mesh->background_color = Vec3f(1.0, 1.0, 1.0);
   Vec3f bg = mesh->background_color;
   // Clear the display buffer, set it to the background color
   glClearColor(bg.r(),bg.g(),bg.b(),0);
@@ -255,6 +258,8 @@ void GLCanvas::motion(int x, int y) {
     mouseX = x;
     mouseY = y;
   }
+
+  forest->cameraMoved(camera->getPosition());
 
   // Redraw the scene with the new camera parameters
   glutPostRedisplay();
