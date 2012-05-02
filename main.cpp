@@ -17,9 +17,9 @@ MTRand GLOBAL_mtrand;
 int main(int argc, char *argv[]) {
 
   // deterministic (repeatable) randomness
-  GLOBAL_mtrand = MTRand(37);
+  // GLOBAL_mtrand = MTRand(37);
   // "real" randomness
-  // GLOBAL_mtrand = MTRand((unsigned)time(0));
+  GLOBAL_mtrand = MTRand((unsigned)time(0));
   //
   
   ArgParser args(argc, argv);

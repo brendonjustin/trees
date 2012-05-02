@@ -12,6 +12,7 @@
 #include "mesh.h"
 
 #include <cmath>
+#include <iostream>
 
 //  precomputed factorial values for 0-10
 const int Seeder::factorial[] = {
@@ -69,7 +70,8 @@ std::vector<std::vector<Vec3f> > Seeder::getTreeLocations(float area, int numBlo
   
   //  Distribute trees at n per block
   for (int i = 0; i < numBlocks; ++i) {
-    cellOffset = Vec3f((i % sqrtNumBlocks) * blockSideLength, 0, 2 * (i / sqrtNumBlocks) * blockSideLength);
+    cellOffset = Vec3f((i / sqrtNumBlocks) * blockSideLength, 0, (i % sqrtNumBlocks) * blockSideLength);
+    cellOffset = Vec3f(0,0,0);
     numTrees = pointsPerBlock[i];
     for (int j = 0; j < numTrees; ++j) {
       intraCellOffset = Vec3f(blockSideLength / 5, 0, blockSideLength / 5) + j*Vec3f(blockSideLength / numTrees,0,0) + (j % (int)m_lambda)*Vec3f(0,0,(int)m_lambda * blockSideLength / numTrees);
