@@ -161,7 +161,7 @@ void Forest::setupVBOs() {
         forest_quad_texcoords[countTrees*4 + 3] = VBOTex(0,1);
 
         //  Set the texture for this tree
-        forest_quad_textures[i] = hemisphere->getNearestView(camera_pos, tree_locations[blockNumber][k])->textureID();
+        forest_quad_textures[i] = hemisphere->getNearestView(tree_locations[blockNumber][k], camera_pos)->textureID();
 
         ++countTrees;
       }
@@ -235,6 +235,7 @@ void Forest::drawVBOs() {
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisable(GL_LIGHTING);
+  glColor3f(1.0,1.0,1.0);
 
   //  Trees
   bool many_textures = false;
@@ -297,7 +298,7 @@ void Forest::cameraMoved(Vec3f cameraPos) {
   {
     for (int j = 0; j < tree_locations[i].size(); ++j)
     {
-      forest_quad_textures[counter++] = hemisphere->getNearestView(camera_pos, tree_locations[i][j])->textureID();
+      forest_quad_textures[counter++] = hemisphere->getNearestView(tree_locations[i][j], camera_pos)->textureID();
     }
   }
 }
