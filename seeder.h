@@ -20,7 +20,7 @@ class Seeder {
   
 public:
   Seeder(double expectedNum) : m_lambda(expectedNum) {};
-  std::vector<std::vector<Vec3f> > getTreeLocations(float area, int numBlocks);
+  std::vector<std::vector<Vec3f> > getTreeLocations(float area, int numBlocks, float treeSize);
   
 };
 

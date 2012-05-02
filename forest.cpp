@@ -12,14 +12,14 @@
 // helper for VBOs
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h), num_trees(0), tree_size(10) {
+Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h), num_trees(0), tree_size(5) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 5), 2);
-  area = num_blocks * tree_size * 4;
+  num_blocks = pow(pow(2, 7), 2);
+  area = num_blocks * tree_size * 6;
 
   Seeder seeder = Seeder(2);
-  tree_locations = seeder.getTreeLocations(area, num_blocks);
+  tree_locations = seeder.getTreeLocations(area, num_blocks, tree_size);
   for (int i = 0; i < tree_locations.size(); ++i)
   {
     num_trees += tree_locations[i].size();
@@ -90,12 +90,13 @@ void Forest::setupVBOs() {
   hVec = Vec3f(0,1,0);
   
   //  Tweak some optional parameters and generate terrain heights
-//    TerrainGenerator::setRatio(0.5f);
+   TerrainGenerator::setRatio(0.5f);
 //    TerrainGenerator::setRatio(1.5f);
-  TerrainGenerator::setRatio(2.0f);
+  // TerrainGenerator::setRatio(2.0f);
 //    TerrainGenerator::setRatio(2.5f);
 //    TerrainGenerator::setScale(2.0f);
-  TerrainGenerator::setScale(100.0f);
+  // TerrainGenerator::setScale(100.0f);
+  TerrainGenerator::setScale(sqrt(sqrt(num_blocks)));
   heights = TerrainGenerator::generate((int)sqrt(num_blocks));
   
   forest_quad_verts = new VBOTriVert[num_trees*4];
@@ -196,7 +197,7 @@ void Forest::setupVBOs() {
   
   delete [] gnd_mesh_tri_verts;
   delete [] gnd_mesh_tri_indices;
-  
+
   delete [] forest_quad_verts;
   delete [] forest_quad_indices;
   delete [] forest_quad_texcoords;
@@ -233,6 +234,7 @@ void Forest::drawVBOs() {
   
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
+  glDisable(GL_LIGHTING);
 
   //  Trees
   bool many_textures = false;
