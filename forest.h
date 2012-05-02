@@ -7,6 +7,8 @@
 
 class Hemisphere;
 
+struct VBOTriVert;
+
 class Forest
 {
  public:
@@ -21,8 +23,12 @@ class Forest
   void setupVBOs();
   void drawVBOs();
   void cleanupVBOs();
+  
+  // CAMERA ADJUSTMENTS
   void setCameraPosition(Vec3f cameraPos);
   void cameraMoved(Vec3f cameraPos);
+  
+  void setTreeQuads();
 
  private:
   // helper functions
@@ -38,10 +44,15 @@ class Forest
   int num_gnd_tris;
   int num_trees;
   int tree_size;
+  bool tree_buffer_set;
 
   Vec3f camera_pos;
+  Vec3f aT, bT, cT, dT;
 
+  //  Hold the world-space coordinates of each tree
   std::vector<std::vector<Vec3f> > tree_locations;
+  
+  VBOTriVert* forest_quad_verts;
   
   std::vector<GLuint> forest_quad_verts_VBO;
   std::vector<GLuint> forest_quad_indices_VBO;
