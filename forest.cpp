@@ -8,12 +8,12 @@
 // helper for VBOs
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-Forest::Forest(ArgParser *a, hemisphere *h) : args(a), hemisphere(h), tree_size(10) {
+Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h), tree_size(10) {
   num_trees = 0;
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 7), 2);
-  area = num_blocks;
+  num_blocks = pow(pow(2, 5), 2);
+  area = num_blocks * tree_size * 4;
 
   Seeder seeder = Seeder(2);
   tree_locations = seeder.getTreeLocations(area, num_blocks);
@@ -21,6 +21,9 @@ Forest::Forest(ArgParser *a, hemisphere *h) : args(a), hemisphere(h), tree_size(
   {
     num_trees += tree_locations[i].size();
   }
+  forest_quad_verts_VBO = std::vector<GLuint> (num_trees);
+  forest_quad_indices_VBO = std::vector<GLuint> (num_trees);
+  forest_quad_texcoords_VBO = std::vector<GLuint> (num_trees);
 }
 
 Forest::~Forest() {
@@ -41,28 +44,29 @@ void Forest::initializeVBOs() {
 void Forest::setupVBOs() {
   //  Setup the ground and the trees
   //  Properties of the ground
-  float sideLength;
+  float blockSideLength;
   //  Area-based weights for vertices, to determine tree heights
-  float a1, a2, a3, a4;
+  float treeHeight, a1, a2, a3, a4, sumA;
 
   //  The vertices for the squares used for the ground and trees
   Vec3f aT, bT, cT, dT, treeNormal;
   Vec3f aG, bG, cG, dG, gndNormal;
   Vec3f baseOffset, offset, hVec;
-  Vec3f baseTreeLoc, treeHeight, treeLoc;
+  Vec3f baseTreeLoc, treeLoc;
 
   VBOTriVert* forest_quad_verts;
   VBOQuad* forest_quad_indices;
   VBOTriVert* gnd_mesh_tri_verts;
   VBOTri* gnd_mesh_tri_indices;
 
-  //  Ground vertex heights and the locations of trees
+  //  Ground vertex heights
   std::vector<std::vector<float> > heights;
   
-  sideLength = sqrt(area / num_blocks);
+  blockSideLength = sqrt(area / num_blocks);
 
   treeNormal = Vec3f(0, 0, 1);
   gndNormal = Vec3f(0, 1, 0);
+  hVec = Vec3f(0, 1, 0);
   
   //  A variable sized vertical square with the bottom left corner at 0,0
   //  For drawing trees
@@ -73,10 +77,10 @@ void Forest::setupVBOs() {
 
   //  A variable sized horizontal square with the bottom left corner at 0,0
   //  For drawing the ground
-  aG = Vec3f(0,            0,  0);
-  bG = Vec3f(sideLength,   0,  sideLength);
-  cG = Vec3f(sideLength,   0,  0);
-  dG = Vec3f(0,            0,  sideLength);
+  aG = Vec3f(0,               0,  0);
+  bG = Vec3f(blockSideLength, 0,  blockSideLength);
+  cG = Vec3f(blockSideLength, 0,  0);
+  dG = Vec3f(0,               0,  blockSideLength);
   hVec = Vec3f(0,1,0);
   
   //  Tweak some optional parameters and generate terrain heights
@@ -98,16 +102,16 @@ void Forest::setupVBOs() {
   int countTrees = 0;
   int blockNumber = 0;
   for (int i = 0; i < sqrt(num_blocks); ++i) {
-    baseOffset = cG*i;
+    baseOffset = dG*i;
     for (int j = 0; j < sqrt(num_blocks); ++j) {
-      offset = baseOffset + dG*j;
-      treeLoc = Vec3f(0,0,0);
+      offset = baseOffset + cG*j;
 
       //  Add a ground square
       gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + aG + hVec*heights[i][j], gndNormal);
       gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + bG + hVec*heights[i+1][j+1], gndNormal);
       gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + cG + hVec*heights[i+1][j], gndNormal);
       gnd_mesh_tri_verts[locCounter++] = VBOTriVert(offset + dG + hVec*heights[i][j+1], gndNormal);
+
       gnd_mesh_tri_indices[locCounter / 2 - 2] = VBOTri(locCounter - 4, locCounter - 3, locCounter - 2);
       gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
 
@@ -115,25 +119,33 @@ void Forest::setupVBOs() {
       blockNumber = i*sqrt(num_blocks) + j;
       for (int k = 0; k < tree_locations[blockNumber].size(); ++k)
       {
-        treeLoc = tree_locations[countTrees][k];
-        a1 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-1].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-1].z) * gnd_mesh_tri_verts[locCounter-1].y;
-        a2 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-2].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-2].z) * gnd_mesh_tri_verts[locCounter-2].y;
-        a3 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-3].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-3].z) * gnd_mesh_tri_verts[locCounter-3].y;
-        a4 = (treeLoc.x() - gnd_mesh_tri_verts[locCounter-4].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-4].z) * gnd_mesh_tri_verts[locCounter-4].y;
+        treeLoc = tree_locations[blockNumber][k];
+        a1 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-1].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-1].z));
+        a2 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-2].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-2].z));
+        a3 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-3].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-3].z));
+        a4 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-4].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-4].z));
+        sumA = a1 + a2 + a3 + a4;
+        a1 /= sumA;
+        a2 /= sumA;
+        a3 /= sumA;
+        a4 /= sumA;
+        // a1 = 0.25f;
+        // a2 = 0.25f;
+        // a3 = 0.25f;
+        // a4 = 0.25f;
         
-        treeHeight = Vec3f(gnd_mesh_tri_verts[locCounter-1].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a1;
-        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-2].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a2;
-        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-3].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a3;
-        treeHeight += Vec3f(gnd_mesh_tri_verts[locCounter-4].x, gnd_mesh_tri_verts[locCounter-1].y, gnd_mesh_tri_verts[locCounter-1].z) * a4;
-        treeHeight = hVec*treeHeight.y();
-        treeLoc += treeHeight;
+        treeHeight = gnd_mesh_tri_verts[locCounter-1].y * a1;
+        treeHeight += gnd_mesh_tri_verts[locCounter-2].y * a2;
+        treeHeight += gnd_mesh_tri_verts[locCounter-3].y * a3;
+        treeHeight += gnd_mesh_tri_verts[locCounter-4].y * a4;
+        treeLoc += treeHeight * hVec;
 
         forest_quad_verts[countTrees*4] = VBOTriVert(treeLoc + aT, treeNormal);
         forest_quad_verts[countTrees*4 + 1] = VBOTriVert(treeLoc + bT, treeNormal);
         forest_quad_verts[countTrees*4 + 2] = VBOTriVert(treeLoc + cT, treeNormal);
         forest_quad_verts[countTrees*4 + 3] = VBOTriVert(treeLoc + dT, treeNormal);
         
-        forest_quad_indices[countTrees++] = VBOQuad(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);
+        forest_quad_indices[countTrees++] = VBOQuad(locCounter - 2, locCounter - 3, locCounter - 1, locCounter - 4);
       }
     }
   }
