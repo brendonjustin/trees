@@ -18,9 +18,6 @@ Camera* GLCanvas::camera = NULL;
 Hemisphere* GLCanvas::hemisphere = NULL;
 Forest* GLCanvas::forest = NULL;
 
-//TEST
-int GLCanvas::viewnum = 0;
-
 // State of the mouse cursor
 int GLCanvas::mouseButton = 0;
 int GLCanvas::mouseX = 0;
@@ -28,6 +25,12 @@ int GLCanvas::mouseY = 0;
 bool GLCanvas::controlPressed = false;
 bool GLCanvas::shiftPressed = false;
 bool GLCanvas::altPressed = false;
+
+//State of some keys
+bool GLCanvas::key_w = false;
+bool GLCanvas::key_a = false;
+bool GLCanvas::key_s = false;
+bool GLCanvas::key_d = false;
 
 // ========================================================
 // Initialize all appropriate OpenGL variables, set
@@ -82,6 +85,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
+  glutKeyboardUpFunc(keyboardUp);
   glutIdleFunc(idle);
 
   HandleGLError("finished glcanvas initialize");
@@ -257,7 +261,7 @@ void GLCanvas::motion(int x, int y) {
 }
 
 // ========================================================
-// Callback function for keyboard events
+// Callback functions for keyboard events
 // ========================================================
 
 void GLCanvas::keyboard(unsigned char key, int x, int y) {
@@ -265,17 +269,39 @@ void GLCanvas::keyboard(unsigned char key, int x, int y) {
   case 'q': case 'Q':
     exit(0);
     break;
-  case ']':
-    viewnum++;
-    if (viewnum == hemisphere->numViews()) viewnum = 0;
-    std::cout << "View " << viewnum << "\n";
-    glutPostRedisplay();
+  case 'w': case 'W':
+    key_w = true;
     break;
-  case '[':
-    viewnum--;
-    if (viewnum == -1) viewnum = hemisphere->numViews() - 1;
-    std::cout << "View " << viewnum << "\n";
-    glutPostRedisplay();
+  case 's': case 'S':
+    key_s = true;
+    break;
+  case 'a': case 'A':
+    key_a = true;
+    break;
+  case 'd': case 'D':
+    key_d = true;
+    break;
+  default:
+    printf("UNKNOWN KEYBOARD INPUT  '%c'\n", key);
+  }
+}
+
+void GLCanvas::keyboardUp(unsigned char key, int x, int y) {
+  switch (key) {
+  case 'q': case 'Q':
+    exit(0);
+    break;
+  case 'w': case 'W':
+    key_w = false;
+    break;
+  case 's': case 'S':
+    key_s = false;
+    break;
+  case 'a': case 'A':
+    key_a = false;
+    break;
+  case 'd': case 'D':
+    key_d = false;
     break;
   default:
     printf("UNKNOWN KEYBOARD INPUT  '%c'\n", key);
@@ -284,6 +310,27 @@ void GLCanvas::keyboard(unsigned char key, int x, int y) {
 
 void GLCanvas::idle() {
   //This is where radiosity->iterate or DrawPixels() is called
+  if (key_w && !key_s)
+    {
+      camera->dollyCameraAndPoI(2);
+    }
+  if (!key_w && key_s)
+    {
+      camera->dollyCameraAndPoI(-2);
+    }
+  if (key_a && !key_d)
+    {
+      camera->truckCamera(-60, 0);
+    }
+  if (!key_a && key_d)
+    {
+      camera->truckCamera(60, 0);
+    }
+  if (key_w || key_a || key_s || key_d)
+    {
+      glutPostRedisplay();
+    }
+  
   glEnd();
   glFlush();
 }

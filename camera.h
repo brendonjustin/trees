@@ -30,6 +30,7 @@ public:
   virtual void glInit(int w, int h) = 0;
   void glPlaceCamera(void);
   void dollyCamera(double dist);
+  void dollyCameraAndPoI(double dist);
   virtual void zoomCamera(double dist) = 0;
   void truckCamera(double dx, double dy);
   void rotateCamera(double rx, double ry);

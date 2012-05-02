@@ -42,9 +42,9 @@ void OrthographicCamera::glInit(int w, int h) {
   if (aspect > 1) 
     vert /= aspect;
   else horiz *= aspect;
-  //double dist_to_poi = (point_of_interest-camera_position).Length();
-  //glOrtho(-horiz, horiz, -vert, vert, dist_to_poi*0.1, dist_to_poi*100.0);
-  glOrtho(-horiz, horiz, -vert, vert, NEAR_DIST, FAR_DIST);
+  double dist_to_poi = (point_of_interest-camera_position).Length();
+  glOrtho(-horiz, horiz, -vert, vert, dist_to_poi*0.1, dist_to_poi*200.0);
+  //glOrtho(-horiz, horiz, -vert, vert, NEAR_DIST, FAR_DIST);
 }
 
 void PerspectiveCamera::glInit(int w, int h) {
@@ -55,9 +55,9 @@ void PerspectiveCamera::glInit(int w, int h) {
   double aspect = double(width)/double(height);
   double asp_angle = angle * 180/M_PI;
   if (aspect > 1) asp_angle /= aspect;
-  //double dist_to_poi = (point_of_interest-camera_position).Length();
-  //gluPerspective(asp_angle, aspect, dist_to_poi*0.1, dist_to_poi*100.0);
-  gluPerspective(asp_angle, aspect, NEAR_DIST, FAR_DIST);
+  double dist_to_poi = (point_of_interest-camera_position).Length();
+  gluPerspective(asp_angle, aspect, dist_to_poi*0.1, dist_to_poi*200.0);
+  //gluPerspective(asp_angle, aspect, NEAR_DIST, FAR_DIST);
 }
 
 // ====================================================================
@@ -81,6 +81,13 @@ void Camera::dollyCamera(double dist) {
   diff.Normalize();
   d *= pow(1.003,dist);
   camera_position = point_of_interest + diff * d;
+}
+
+void Camera::dollyCameraAndPoI(double dist) {
+  Vec3f diff = point_of_interest - camera_position;
+  diff.Normalize();
+  camera_position += diff * dist;
+  point_of_interest += diff * dist;
 }
 
 // ====================================================================

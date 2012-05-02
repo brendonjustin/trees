@@ -159,10 +159,6 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   //Copy it over to the view data
   for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
     {
-      if (depthdata[i] != 0 && depthdata[i] != 1)
-	{
-	  std::cout << "woo\n";
-	}
       data[i].maxd = depthdata[i];
     }
 

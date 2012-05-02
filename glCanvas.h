@@ -55,9 +55,6 @@ private:
   static Hemisphere* hemisphere;
   static Forest* forest;
 
-  //TEST
-  static int viewnum;
-
   // state of the mouse cursor
   static int mouseButton;
   static int mouseX;
@@ -66,12 +63,19 @@ private:
   static bool controlPressed;
   static bool altPressed;
 
+  //State of some keys
+  static bool key_w;
+  static bool key_a;
+  static bool key_s;
+  static bool key_d;
+
   // Callback functions for mouse and keyboard events
   static void display(void);
   static void reshape(int w, int h);
   static void mouse(int button, int state, int x, int y);
   static void motion(int x, int y);
   static void keyboard(unsigned char key, int x, int y);
+  static void keyboardUp(unsigned char key, int x, int y);
   static void idle();
 };
 
