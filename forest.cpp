@@ -12,15 +12,18 @@
 // helper for VBOs
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h), num_trees(0), tree_size(5) {
+Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h), 
+                                              num_trees(0), tree_size(5),
+                                              tree_buffer_set(false) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 7), 2);
+  num_blocks = pow(pow(2, 5), 2);
   area = num_blocks * tree_size * 6;
 
   Seeder seeder = Seeder(2);
+  //  Get the block-space coordinates of each tree
   tree_locations = seeder.getTreeLocations(area, num_blocks, tree_size);
-  for (int i = 0; i < tree_locations.size(); ++i)
+  for (unsigned int i = 0; i < tree_locations.size(); ++i)
   {
     num_trees += tree_locations[i].size();
   }
@@ -35,6 +38,8 @@ Forest::~Forest() {
 }
 
 void Forest::initializeVBOs() {
+  forest_quad_verts = new VBOTriVert[num_trees*4];
+  
   // create a pointer for the vertex & index VBOs
   glGenBuffers(num_trees, &forest_quad_verts_VBO[0]);
   glGenBuffers(num_trees, &forest_quad_indices_VBO[0]);
@@ -54,12 +59,10 @@ void Forest::setupVBOs() {
   float treeHeight, a1, a2, a3, a4, sumA;
 
   //  The vertices for the squares used for the ground and trees
-  Vec3f aT, bT, cT, dT, treeNormal;
   Vec3f aG, bG, cG, dG, gndNormal;
   Vec3f baseOffset, blockOffset, hVec;
-  Vec3f baseTreeLoc, treeLoc;
+  Vec3f treeLocation;
 
-  VBOTriVert* forest_quad_verts;
   VBOQuad* forest_quad_indices;
   VBOTex* forest_quad_texcoords;
   VBOTriVert* gnd_mesh_tri_verts;
@@ -70,19 +73,11 @@ void Forest::setupVBOs() {
   
   blockSideLength = sqrt(area / num_blocks);
 
-  treeNormal = Vec3f(0, 0, 1);
   gndNormal = Vec3f(0, 1, 0);
   hVec = Vec3f(0, 1, 0);
-  
-  //  A variable sized vertical square with the bottom left corner at 0,0
-  //  For drawing trees
-  aT = Vec3f(0,                 0,  0);
-  bT = Vec3f(tree_size, tree_size,  0);
-  cT = Vec3f(tree_size,         0,  0);
-  dT = Vec3f(0,         tree_size,  0);
 
-  //  A variable sized horizontal square with the bottom left corner at 0,0
   //  For drawing the ground
+  //  A variable sized horizontal square with the bottom left corner at 0,0
   aG = Vec3f(0,               0,  0);
   bG = Vec3f(blockSideLength, 0,  blockSideLength);
   cG = Vec3f(blockSideLength, 0,  0);
@@ -99,7 +94,6 @@ void Forest::setupVBOs() {
   TerrainGenerator::setScale(sqrt(sqrt(num_blocks)));
   heights = TerrainGenerator::generate((int)sqrt(num_blocks));
   
-  forest_quad_verts = new VBOTriVert[num_trees*4];
   forest_quad_indices = new VBOQuad[num_trees];
   forest_quad_texcoords = new VBOTex[num_trees*4];
 
@@ -126,16 +120,16 @@ void Forest::setupVBOs() {
 
       //  Create the trees in this ground square
       blockNumber = i*sqrt(num_blocks) + j;
-      for (int k = 0; k < tree_locations[blockNumber].size(); ++k)
+      for (unsigned int k = 0; k < tree_locations[blockNumber].size(); ++k)
       {
-        treeLoc = tree_locations[blockNumber][k] + blockOffset;
+        treeLocation = tree_locations[blockNumber][k] + blockOffset;
 
         //  Calculate the height that the tree should be at,
         //  by averaging nearby verticies' heights by proximity
-        a1 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-1].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-1].z));
-        a2 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-2].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-2].z));
-        a3 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-3].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-3].z));
-        a4 = abs((treeLoc.x() - gnd_mesh_tri_verts[locCounter-4].x)*(treeLoc.z() - gnd_mesh_tri_verts[locCounter-4].z));
+        a1 = abs((treeLocation.x() - gnd_mesh_tri_verts[locCounter-1].x)*(treeLocation.z() - gnd_mesh_tri_verts[locCounter-1].z));
+        a2 = abs((treeLocation.x() - gnd_mesh_tri_verts[locCounter-2].x)*(treeLocation.z() - gnd_mesh_tri_verts[locCounter-2].z));
+        a3 = abs((treeLocation.x() - gnd_mesh_tri_verts[locCounter-3].x)*(treeLocation.z() - gnd_mesh_tri_verts[locCounter-3].z));
+        a4 = abs((treeLocation.x() - gnd_mesh_tri_verts[locCounter-4].x)*(treeLocation.z() - gnd_mesh_tri_verts[locCounter-4].z));
         sumA = a1 + a2 + a3 + a4;
         a1 /= sumA;
         a2 /= sumA;
@@ -146,19 +140,18 @@ void Forest::setupVBOs() {
         treeHeight += gnd_mesh_tri_verts[locCounter-2].y * a2;
         treeHeight += gnd_mesh_tri_verts[locCounter-3].y * a3;
         treeHeight += gnd_mesh_tri_verts[locCounter-4].y * a4;
-        treeLoc += treeHeight * hVec;
+        treeLocation += treeHeight * hVec;
 
-        //  Create a quad to draw the tree on
-        forest_quad_verts[countTrees*4] = VBOTriVert(treeLoc + aT, treeNormal);
-        forest_quad_verts[countTrees*4 + 1] = VBOTriVert(treeLoc + bT, treeNormal);
-        forest_quad_verts[countTrees*4 + 2] = VBOTriVert(treeLoc + cT, treeNormal);
-        forest_quad_verts[countTrees*4 + 3] = VBOTriVert(treeLoc + dT, treeNormal);
+        //  Save the world-space tree coordinate over the block-space coordinate
+        tree_locations[blockNumber][k] = treeLocation;
+
+        //  Create a quad to draw the tree on in another function later
         
-        forest_quad_indices[countTrees] = VBOQuad(locCounter - 2, locCounter - 3, locCounter - 1, locCounter - 4);
+        forest_quad_indices[countTrees] = VBOQuad(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);
         forest_quad_texcoords[countTrees*4] = VBOTex(0,0);
-        forest_quad_texcoords[countTrees*4 + 1] = VBOTex(1,1);
-        forest_quad_texcoords[countTrees*4 + 2] = VBOTex(1,0);
-        forest_quad_texcoords[countTrees*4 + 3] = VBOTex(0,1);
+        forest_quad_texcoords[countTrees*4 + 1] = VBOTex(0,1);
+        forest_quad_texcoords[countTrees*4 + 2] = VBOTex(1,1);
+        forest_quad_texcoords[countTrees*4 + 3] = VBOTex(1,0);
 
         //  Set the texture for this tree
         forest_quad_textures[i] = hemisphere->getNearestView(tree_locations[blockNumber][k], camera_pos)->textureID();
@@ -167,6 +160,8 @@ void Forest::setupVBOs() {
       }
     }
   }
+  
+  setTreeQuads();
 
   glBindBuffer(GL_ARRAY_BUFFER,gnd_mesh_tri_verts_VBO);
   glBufferData(GL_ARRAY_BUFFER,
@@ -179,11 +174,6 @@ void Forest::setupVBOs() {
                gnd_mesh_tri_indices,
                GL_STATIC_DRAW);
   
-  glBindBuffer(GL_ARRAY_BUFFER,forest_quad_verts_VBO[0]);
-  glBufferData(GL_ARRAY_BUFFER,
-               sizeof(VBOTriVert) * num_trees * 4,
-               forest_quad_verts,
-               GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,forest_quad_indices_VBO[0]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                sizeof(VBOQuad) * num_trees,
@@ -198,7 +188,6 @@ void Forest::setupVBOs() {
   delete [] gnd_mesh_tri_verts;
   delete [] gnd_mesh_tri_indices;
 
-  delete [] forest_quad_verts;
   delete [] forest_quad_indices;
   delete [] forest_quad_texcoords;
 
@@ -206,6 +195,8 @@ void Forest::setupVBOs() {
 }
 
 void Forest::cleanupVBOs() {
+  delete [] forest_quad_verts;
+  
   glDeleteBuffers(num_trees, &forest_quad_verts_VBO[0]);
   glDeleteBuffers(num_trees, &forest_quad_indices_VBO[0]);
   glDeleteBuffers(num_trees, &forest_quad_texcoords_VBO[0]);
@@ -218,8 +209,9 @@ void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
-  glEnable(GL_LIGHTING);
-  glDisable(GL_BLEND);
+  glEnable( GL_DEPTH_TEST );
+  glEnable( GL_LIGHTING );
+  glDisable( GL_BLEND );
   glColor3f(0,1,0);
   glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -235,8 +227,12 @@ void Forest::drawVBOs() {
   
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
-  glDisable(GL_LIGHTING);
-  glEnable(GL_BLEND);
+  glDisable( GL_LIGHTING );
+  glDisable( GL_DEPTH_TEST );
+
+  glEnable( GL_DEPTH_TEST );
+  glEnable( GL_MULTISAMPLE_ARB );
+  glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
   glColor3f(1.0,1.0,1.0);
 
   //  Trees
@@ -286,7 +282,9 @@ void Forest::drawVBOs() {
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
-  glDisable(GL_BLEND);
+  glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+  glDisable( GL_MULTISAMPLE_ARB );
+  glDisable( GL_DEPTH_TEST );
 }
 
 void Forest::setCameraPosition(Vec3f cameraPos) {
@@ -295,17 +293,47 @@ void Forest::setCameraPosition(Vec3f cameraPos) {
 
 void Forest::cameraMoved(Vec3f cameraPos) {
   setCameraPosition(cameraPos);
+  setTreeQuads();
+}
 
+void Forest::setTreeQuads() {
   int counter = 0;
-  for (int i = 0; i < tree_locations.size(); ++i)
+  for (unsigned int i = 0; i < tree_locations.size(); ++i)
   {
-    for (int j = 0; j < tree_locations[i].size(); ++j)
+    for (unsigned int j = 0; j < tree_locations[i].size(); ++j)
     {
+      Vec3f treeLoc = tree_locations[i][j];
+      //  Create a quad to draw the tree on
+      Vec3f center = treeLoc + Vec3f(0, tree_size/2, 0);
+      Vec3f toCamera = camera_pos - center;
+      toCamera.Normalize();
+      Vec3f horiz, vert;
+      Vec3f::Cross3(horiz, Vec3f(0,1,0), toCamera);
+      Vec3f::Cross3(vert, toCamera, horiz);
+      horiz.Normalize(); vert.Normalize();
+      forest_quad_verts[counter*4] = VBOTriVert(center - (tree_size/2)*horiz - (tree_size/2)*vert, toCamera);
+      forest_quad_verts[counter*4+1] = VBOTriVert(center - (tree_size/2)*horiz + (tree_size/2)*vert, toCamera);
+      forest_quad_verts[counter*4+2] = VBOTriVert(center + (tree_size/2)*horiz + (tree_size/2)*vert, toCamera);
+      forest_quad_verts[counter*4+3] = VBOTriVert(center + (tree_size/2)*horiz - (tree_size/2)*vert, toCamera);
       forest_quad_textures[counter++] = hemisphere->getNearestView(tree_locations[i][j], camera_pos)->textureID();
     }
   }
+  
+  glBindBuffer(GL_ARRAY_BUFFER,forest_quad_verts_VBO[0]);
+  if (tree_buffer_set)
+  {
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    sizeof(VBOTriVert) * num_trees * 4,
+                    forest_quad_verts);
+  }
+  else
+  {
+    tree_buffer_set = true;
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(VBOTriVert) * num_trees * 4,
+                 forest_quad_verts,
+                 GL_STATIC_DRAW);
+  }
+  
 }
-
-/*
-glBindTexture(GL_TEXTURE_2D, hemisphere->getNearestView(Vec3f(0,0,0),camera->getPosition())->textureID());
-*/

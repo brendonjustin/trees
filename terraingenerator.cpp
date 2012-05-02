@@ -120,8 +120,7 @@ void TerrainGenerator::squareIteration(std::vector<std::vector<float> >& vec, in
 std::vector<std::vector<float> > TerrainGenerator::generate(int squaresPerSide)
 {
   int count, iterations, pointsPerSide;
-  int x1, x2, x3, x4;
-  int y1, y2, y3, y4;
+  int x1, x2, y1, y2;
   pointsPerSide = squaresPerSide + 1;
   std::vector<std::vector<float> > heights;
 
@@ -134,11 +133,7 @@ std::vector<std::vector<float> > TerrainGenerator::generate(int squaresPerSide)
   x1 = 0;
   y1 = 0;
   x2 = squaresPerSide;
-  y2 = 0;
-  x3 = 0;
-  y3 = squaresPerSide;
-  x4 = squaresPerSide;
-  y4 = squaresPerSide;
+  y2 = squaresPerSide;
 
   //  Initialize the corners to height 0
   heights[x1][y1] = heights[x1][y2] = heights[x2][y2] = heights[x2][y1] = 0;

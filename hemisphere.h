@@ -35,6 +35,7 @@ class Hemisphere
   //Accessors
   View* getView(int i, int j) {return view[i][j];}
   int numViews();
+  Vec3f getCenter() {return (min+max)/2;}
 
   //General use functions
   void setup();
