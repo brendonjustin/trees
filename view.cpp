@@ -144,6 +144,8 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
     {
       data[i].color = Vec3f(texdata[3*i], texdata[(3*i)+1], texdata[(3*i)+2]);
       data[i].mind = depthdata[i];
+      if (data[i].mind == 1) {data[i].opacity = 0;}
+      else {data[i].opacity = 1;}
     }
 
   //Render again, but with depth function set to GL_GREATER for maximum distance
@@ -157,6 +159,10 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   //Copy it over to the view data
   for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
     {
+      if (depthdata[i] != 0 && depthdata[i] != 1)
+	{
+	  std::cout << "woo\n";
+	}
       data[i].maxd = depthdata[i];
     }
 

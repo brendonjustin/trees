@@ -7,6 +7,10 @@
 #include "vectors.h"
 #include "ray.h"
 
+const double NEAR_DIST = 2;
+const double FAR_DIST = 150;
+
+
 // ====================================================================
 
 class Camera {

@@ -40,6 +40,9 @@ class View
   //Constructors
   View();
   View(Mesh* inmesh);
+
+  //Accessors
+  texel getTexel(int i, int j) {return data[(VIEW_SIZE*i)+j];}
   Vec3f color(int i, int j) {return data[(VIEW_SIZE*i)+j].color;}
   GLuint textureID() {return texture;}
 

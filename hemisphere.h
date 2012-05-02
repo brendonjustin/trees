@@ -20,6 +20,7 @@ const float HEMISPHERE_PI = 3.1415926535;
 class View;
 class Mesh;
 class Vec3f;
+struct texel;
 
 class Hemisphere
 {
@@ -39,6 +40,7 @@ class Hemisphere
   void setup();
   View* getNearestView(float angXZ, float angY);
   View* getNearestView(Vec3f pos, Vec3f camera);
+  View* getInterpolatedView(Vec3f pos, Vec3f camera);
   View* getInterpolatedView(float angXZ, float angY);
 
  private:
@@ -59,6 +61,10 @@ class Hemisphere
 
   //Helper functions
   void computeBounds();
+  Vec3f projectPoint(Vec3f p, Vec3f center, float angXZ, float angY);
+  texel getNearestTexel(Vec3f p, Vec3f center, float angXZ, float angY);
+  float getXZAngFromLevel(int i) {return (i*HEMISPHERE_PI*2)/view[0].size();}
+  float getYAngFromLevel(int i) {return (i*HEMISPHERE_PI*0.5)/(levels-1);}
 };
 
 #endif
