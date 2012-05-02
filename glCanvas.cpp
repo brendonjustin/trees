@@ -246,6 +246,7 @@ void GLCanvas::motion(int x, int y) {
     camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
     mouseX = x;
     mouseY = y;
+    forest->cameraMoved(camera->getPosition());
   }
   // Right button = dolly or zoom
   // (move camera along the direction vector)
@@ -257,9 +258,9 @@ void GLCanvas::motion(int x, int y) {
     }
     mouseX = x;
     mouseY = y;
+    forest->cameraMoved(camera->getPosition());
   }
 
-  forest->cameraMoved(camera->getPosition());
 
   // Redraw the scene with the new camera parameters
   glutPostRedisplay();
@@ -333,6 +334,7 @@ void GLCanvas::idle() {
     }
   if (key_w || key_a || key_s || key_d)
     {
+      forest->cameraMoved(camera->getPosition());
       glutPostRedisplay();
     }
   
