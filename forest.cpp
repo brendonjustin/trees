@@ -3,6 +3,7 @@
 
 #include "argparser.h"
 #include "hemisphere.h"
+#include "matrix.h"
 #include "mesh.h"
 #include "terraingenerator.h"
 #include "view.h"
@@ -19,6 +20,13 @@ Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h),
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
   num_blocks = pow(pow(2, 5), 2);
   area = num_blocks * tree_size * 6;
+  
+  //  For drawing trees
+  //  A variable sized vertical square with the bottom center at 0,0
+  aT = Vec3f(-tree_size / 2.0f, 0, 0);
+  bT = Vec3f(tree_size / 2.0f,  tree_size,  0);
+  cT = Vec3f(tree_size / 2.0f,  0,  0);
+  dT = Vec3f(-tree_size / 2.0f, tree_size,  0);
 
   Seeder seeder = Seeder(2);
   //  Get the block-space coordinates of each tree
@@ -144,7 +152,6 @@ void Forest::setupVBOs() {
 
         //  Save the world-space tree coordinate over the block-space coordinate
         tree_locations[blockNumber][k] = treeLocation;
-
         //  Create a quad to draw the tree on in another function later
         
         forest_quad_indices[countTrees] = VBOQuad(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);

@@ -47,6 +47,7 @@ class Forest
   bool tree_buffer_set;
 
   Vec3f camera_pos;
+  Vec3f aT, bT, cT, dT;
 
   //  Hold the world-space coordinates of each tree
   std::vector<std::vector<Vec3f> > tree_locations;
