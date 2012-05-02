@@ -217,8 +217,9 @@ void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
-  glEnable(GL_LIGHTING);
-  glDisable(GL_BLEND);
+  glEnable( GL_DEPTH_TEST );
+  glEnable( GL_LIGHTING );
+  glDisable( GL_BLEND );
   glColor3f(0,1,0);
   glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -234,8 +235,12 @@ void Forest::drawVBOs() {
   
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
-  glDisable(GL_LIGHTING);
-  glEnable(GL_BLEND);
+  glDisable( GL_LIGHTING );
+  glDisable( GL_DEPTH_TEST );
+
+  glEnable( GL_DEPTH_TEST );
+  glEnable( GL_MULTISAMPLE_ARB );
+  glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
   glColor3f(1.0,1.0,1.0);
 
   //  Trees
@@ -285,7 +290,9 @@ void Forest::drawVBOs() {
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
-  glDisable(GL_BLEND);
+  glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+  glDisable( GL_MULTISAMPLE_ARB );
+  glDisable( GL_DEPTH_TEST );
 }
 
 void Forest::setCameraPosition(Vec3f cameraPos) {
@@ -301,7 +308,7 @@ void Forest::setTreeQuads() {
   Matrix rotationMatrix;
   Vec3f cameraVec;
   Vec3f treeLocation, treeNormal, crossProd;
-  float cameraAngle;
+  float cameraPitch;
   
   treeNormal = Vec3f(0,0,1);
   int counter = 0;
@@ -314,9 +321,9 @@ void Forest::setTreeQuads() {
       cameraVec.sety(0);
       cameraVec.Normalize();
       Vec3f::Cross3(crossProd, cameraVec, treeNormal);
-      cameraAngle = acos(cameraVec.Dot3(treeNormal));
-      if (crossProd.y() > 0) cameraAngle = -cameraAngle;
-      rotationMatrix = Matrix::MakeYRotation(cameraAngle);
+      cameraPitch = acos(cameraVec.Dot3(treeNormal));
+      if (crossProd.y() > 0) cameraPitch = -cameraPitch;
+      rotationMatrix = Matrix::MakeYRotation(cameraPitch);
       
       forest_quad_verts[counter*4] = VBOTriVert(treeLocation + rotationMatrix*aT, treeNormal);
       forest_quad_verts[counter*4 + 1] = VBOTriVert(treeLocation + rotationMatrix*bT, treeNormal);

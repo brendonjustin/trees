@@ -155,41 +155,10 @@ void GLCanvas::display(void) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
   
-  //  glCallList(display_list_index);
   glGetError();
   HandleGLError(); 
 
-  //  Draw the ground. Includes visualization of tree placement
-  // mesh->drawGndVBOs();
-
-  // glColor3f(1.0,1.0,1.0);
-  // glDisable(GL_LIGHTING);
-  // glMatrixMode(GL_PROJECTION);
-  // glPushMatrix();
-  // glLoadIdentity();
-  // int w = glutGet(GLUT_WINDOW_WIDTH);
-  // int h = glutGet(GLUT_WINDOW_HEIGHT);
-  // gluOrtho2D(0, w, 0, h);
-  // glClearColor(0,0,0,0);
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // glMatrixMode(GL_MODELVIEW);
-  // glPushMatrix();
-  // glLoadIdentity();
-  // //glBindTexture(GL_TEXTURE_2D, hemisphere->getView(viewnum)->textureID());
-  // glBindTexture(GL_TEXTURE_2D,
-		// hemisphere->getNearestView(Vec3f(0,0,0),camera->getPosition())->textureID());
-  // glBegin(GL_QUADS);
-  // glTexCoord2f(0.0, 0.0);
-  // glVertex2i(0, 0);
-  // glTexCoord2f(1.0, 0.0);
-  // glVertex2i(w, 0);
-  // glTexCoord2f(1.0, 1.0);
-  // glVertex2i(w, h);
-  // glTexCoord2f(0.0, 1.0);
-  // glVertex2i(0, h);
-  // glEnd();
-  // glBindTexture(GL_TEXTURE_2D, 0);
-
+  //  draw the trees and the ground
   forest->drawVBOs();
    
   // Swap the back buffer with the front buffer to display
@@ -246,7 +215,6 @@ void GLCanvas::motion(int x, int y) {
     camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
     mouseX = x;
     mouseY = y;
-    forest->cameraMoved(camera->getPosition());
   }
   // Right button = dolly or zoom
   // (move camera along the direction vector)
@@ -258,8 +226,8 @@ void GLCanvas::motion(int x, int y) {
     }
     mouseX = x;
     mouseY = y;
-    forest->cameraMoved(camera->getPosition());
   }
+  forest->cameraMoved(camera->getPosition());
 
 
   // Redraw the scene with the new camera parameters
