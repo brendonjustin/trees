@@ -219,6 +219,7 @@ void Forest::drawVBOs() {
 
   //  Ground
   glEnable(GL_LIGHTING);
+  glDisable(GL_BLEND);
   glColor3f(0,1,0);
   glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -235,6 +236,7 @@ void Forest::drawVBOs() {
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisable(GL_LIGHTING);
+  glEnable(GL_BLEND);
   glColor3f(1.0,1.0,1.0);
 
   //  Trees
@@ -284,6 +286,7 @@ void Forest::drawVBOs() {
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
+  glDisable(GL_BLEND);
 }
 
 void Forest::setCameraPosition(Vec3f cameraPos) {

@@ -87,6 +87,8 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
 
   HandleGLError("Before FBO");
 
@@ -99,7 +101,7 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, VIEW_SIZE, VIEW_SIZE, 0, GL_RGB, GL_FLOAT, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIEW_SIZE, VIEW_SIZE, 0, GL_RGBA, GL_FLOAT, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
     
   glGenFramebuffers(1, &color_FBO);
@@ -131,9 +133,9 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   mesh->drawVBOs();
 
   //Get the texture data
-  float texdata[VIEW_SIZE*VIEW_SIZE*3];
+  float texdata[VIEW_SIZE*VIEW_SIZE*4];
   glBindTexture(GL_TEXTURE_2D, texture);
-  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texdata);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, texdata);
 
   //Get the depth data
   float depthdata[VIEW_SIZE*VIEW_SIZE];
@@ -142,7 +144,7 @@ void View::computeView(float angXZ, float angY, int distance, Vec3f min, Vec3f m
   //Copy it over to the view data
   for (int i = 0; i < VIEW_SIZE*VIEW_SIZE; i++)
     {
-      data[i].color = Vec3f(texdata[3*i], texdata[(3*i)+1], texdata[(3*i)+2]);
+      data[i].color = Vec3f(texdata[4*i], texdata[(4*i)+1], texdata[(4*i)+2]);
       data[i].mind = depthdata[i];
       if (data[i].mind == 1) {data[i].opacity = 0;}
       else {data[i].opacity = 1;}
