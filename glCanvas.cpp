@@ -88,9 +88,11 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
 
   mesh->initializeVBOs();
   hemisphere->setup();
+
+  forest->setCameraPosition(camera->getPosition());
   forest->initializeVBOs();
 
-  HandleGLError("finished mesh, hemisphere, and forest initialize");
+  HandleGLError("finished mesh, hemisphere, and forest initialization");
 
   // Enter the main rendering loop
   glutMainLoop();
@@ -252,6 +254,8 @@ void GLCanvas::motion(int x, int y) {
     mouseX = x;
     mouseY = y;
   }
+
+  forest->cameraMoved(camera->getPosition());
 
   // Redraw the scene with the new camera parameters
   glutPostRedisplay();
