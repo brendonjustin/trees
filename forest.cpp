@@ -96,15 +96,16 @@ void Forest::setupVBOs() {
   bG = Vec3f(blockSideLength, 0,  blockSideLength);
   cG = Vec3f(blockSideLength, 0,  0);
   dG = Vec3f(0,               0,  blockSideLength);
+  hVec = Vec3f(0,1,0);
   
   sqrtNumBlocks = sqrt(num_blocks);
   
   //  Tweak some optional parameters and generate terrain heights
-   TerrainGenerator::setRatio(0.5f);
-//    TerrainGenerator::setRatio(1.5f);
+  TerrainGenerator::setRatio(0.5f);
+  // TerrainGenerator::setRatio(1.5f);
   // TerrainGenerator::setRatio(2.0f);
-//    TerrainGenerator::setRatio(2.5f);
-//    TerrainGenerator::setScale(2.0f);
+  // TerrainGenerator::setRatio(2.5f);
+  // TerrainGenerator::setScale(2.0f);
   // TerrainGenerator::setScale(100.0f);
   TerrainGenerator::setScale(sqrt(sqrtNumBlocks));
   heights = TerrainGenerator::generate(sqrtNumBlocks);
