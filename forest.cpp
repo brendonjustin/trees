@@ -218,6 +218,7 @@ void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
+  glDisable( GL_BLEND );
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_LIGHTING );
   glColor3f(0,1,0);
