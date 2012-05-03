@@ -48,7 +48,7 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
 
   // Vec3f camera_position = Vec3f(0,0,5);
   Vec3f camera_position = Vec3f(50,10,-200);
-  Vec3f point_of_interest = Vec3f(50,0,50);
+  Vec3f point_of_interest = Vec3f(50,10,-195);
   // Vec3f point_of_interest = Vec3f(0,0,0);
   Vec3f up = Vec3f(0,1,0);
   camera = new PerspectiveCamera(camera_position, point_of_interest, up, 20 * M_PI/180.0);
@@ -215,6 +215,7 @@ void GLCanvas::motion(int x, int y) {
     camera->truckCamera((mouseX-x)*0.5, (y-mouseY)*0.5);
     mouseX = x;
     mouseY = y;
+    forest->cameraMoved(camera->getPosition());
   }
   // Right button = dolly or zoom
   // (move camera along the direction vector)
@@ -226,8 +227,8 @@ void GLCanvas::motion(int x, int y) {
     }
     mouseX = x;
     mouseY = y;
+    forest->cameraMoved(camera->getPosition());
   }
-  forest->cameraMoved(camera->getPosition());
 
 
   // Redraw the scene with the new camera parameters
