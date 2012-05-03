@@ -18,7 +18,7 @@ Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h),
                                               tree_buffer_set(false) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 5), 2);
+  num_blocks = pow(pow(2, 7), 2);
   area = num_blocks * tree_size * 6;
   
   //  For drawing trees
@@ -111,6 +111,7 @@ void Forest::setupVBOs() {
   //  Draw ground squares and trees
   int locCounter = 0;
   int countTrees = 0;
+  countTrees = num_trees;
   int blockNumber = 0;
   for (int i = 0; i < sqrt(num_blocks); ++i) {
     baseOffset = cG*i;
@@ -161,9 +162,10 @@ void Forest::setupVBOs() {
         forest_quad_texcoords[countTrees*4 + 3] = VBOTex(1,0);
 
         //  Set the texture for this tree
-        forest_quad_textures[i] = hemisphere->getNearestView(tree_locations[blockNumber][k], camera_pos)->textureID();
+        forest_quad_textures[countTrees] = hemisphere->getNearestView(tree_locations[blockNumber][k], camera_pos)->textureID();
 
-        ++countTrees;
+        // ++countTrees;
+        --countTrees;
       }
     }
   }
@@ -216,9 +218,9 @@ void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
+  glDisable( GL_BLEND );
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_LIGHTING );
-  glDisable( GL_BLEND );
   glColor3f(0,1,0);
   glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
   glEnableClientState(GL_VERTEX_ARRAY);

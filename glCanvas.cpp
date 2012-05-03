@@ -46,8 +46,10 @@ void GLCanvas::initialize(ArgParser *_args, Mesh* _mesh, Hemisphere* _hemisphere
   hemisphere = _hemisphere;
   forest = _forest;
 
-  Vec3f camera_position = Vec3f(0,0,5);
-  Vec3f point_of_interest = Vec3f(0,0,0);
+  // Vec3f camera_position = Vec3f(0,0,5);
+  Vec3f camera_position = Vec3f(50,10,-200);
+  Vec3f point_of_interest = Vec3f(50,0,50);
+  // Vec3f point_of_interest = Vec3f(0,0,0);
   Vec3f up = Vec3f(0,1,0);
   camera = new PerspectiveCamera(camera_position, point_of_interest, up, 20 * M_PI/180.0);
 
@@ -112,7 +114,8 @@ void GLCanvas::InitLight() {
   GLfloat position[4] = { 30,30,100, 1};
   GLfloat diffuse[4] = { 0.75,0.75,0.75,1};
   GLfloat specular[4] = { 0,0,0,1};
-  GLfloat ambient[4] = { 0.2, 0.2, 0.2, 1.0 };
+  // GLfloat ambient[4] = { 0.2, 0.2, 0.2, 1.0 };
+  GLfloat ambient[] = { 0.7, 0.7, 0.7, 1.0 };
 
   GLfloat zero[4] = {0,0,0,0};
   glLightfv(GL_LIGHT1, GL_POSITION, position);
@@ -152,14 +155,11 @@ void GLCanvas::display(void) {
   camera->glPlaceCamera();
   InitLight(); // light will be a headlamp!
   
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_TEXTURE_2D);
-  
-  glGetError();
-  HandleGLError(); 
-
   //  draw the trees and the ground
   forest->drawVBOs();
+
+  glGetError();
+  HandleGLError(); 
    
   // Swap the back buffer with the front buffer to display
   // the scene
