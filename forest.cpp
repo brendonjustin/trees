@@ -218,10 +218,9 @@ void Forest::drawVBOs() {
   // draw the ground and the trees
 
   //  Ground
-  glDisable( GL_BLEND );
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_LIGHTING );
-  glColor3f(0,1,0);
+  glColor3f(0,0.3f,0);
   glBindBuffer(GL_ARRAY_BUFFER, gnd_mesh_tri_verts_VBO);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
@@ -240,9 +239,10 @@ void Forest::drawVBOs() {
   glDisable( GL_DEPTH_TEST );
 
   glEnable( GL_DEPTH_TEST );
-  glEnable( GL_MULTISAMPLE_ARB );
-  glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
-  glEnable(GL_BLEND);
+  // glEnable( GL_MULTISAMPLE_ARB );
+  // glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+  glEnable( GL_TEXTURE_2D );
+  glEnable( GL_BLEND );
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor3f(1.0,1.0,1.0);
 
@@ -278,8 +278,8 @@ void Forest::drawVBOs() {
     glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
     glEnableClientState(GL_NORMAL_ARRAY);
     glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, forest_quad_texcoords_VBO[0]);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, sizeof(VBOTex), BUFFER_OFFSET(0));
     glBindTexture(GL_TEXTURE_2D, forest_quad_textures[0]);
 
@@ -293,8 +293,10 @@ void Forest::drawVBOs() {
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
-  glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
-  glDisable( GL_MULTISAMPLE_ARB );
+  glDisable( GL_TEXTURE_2D );
+  glDisable( GL_BLEND );
+  // glDisable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+  // glDisable( GL_MULTISAMPLE_ARB );
   glDisable( GL_DEPTH_TEST );
 }
 
