@@ -56,7 +56,7 @@ std::vector<int> Seeder::getPoissonDistribution(int numBlocks)
 std::vector<std::vector<Vec3f> > Seeder::getTreeLocations(float area, int numBlocks, float treeSize)
 {
   //  The scene's ground
-  float blockSideLength;
+  float blockSideLength, randOffset1, randOffset2;
   int numTrees;
   std::vector<int> pointsPerBlock;
   Vec3f intraCellOffset;
@@ -70,10 +70,11 @@ std::vector<std::vector<Vec3f> > Seeder::getTreeLocations(float area, int numBlo
   for (int i = 0; i < numBlocks; ++i) {
     numTrees = pointsPerBlock[i];
     for (int j = 0; j < numTrees; ++j) {
-      intraCellOffset = Vec3f(blockSideLength / 2, 0, blockSideLength / 2) 
-                        // + j*Vec3f(blockSideLength / numTrees,0,blockSideLength / numTrees) 
-                        + (j / (int)m_lambda)*Vec3f((int)m_lambda * blockSideLength / numTrees,0,(int)m_lambda * blockSideLength / (numTrees*2))
-                        + (j % (int)m_lambda)*Vec3f((int)m_lambda * blockSideLength / (numTrees*2),0,(int)m_lambda * blockSideLength / numTrees);
+      randOffset1 = (GLOBAL_mtrand.rand() + 0.5);
+      randOffset2 = (GLOBAL_mtrand.rand() + 0.5);
+      intraCellOffset = Vec3f(randOffset1 * blockSideLength / numTrees, 0, randOffset2 * blockSideLength / numTrees) 
+                        + (j / (int)m_lambda)*Vec3f(randOffset1 * blockSideLength / numTrees,0,randOffset2 * blockSideLength / (numTrees*2))
+                        + (j % (int)m_lambda)*Vec3f(randOffset2 * blockSideLength / (numTrees*2),0,randOffset1 * blockSideLength / numTrees);
       locations[i].push_back(intraCellOffset);
     }
   }
