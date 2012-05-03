@@ -240,6 +240,8 @@ void Forest::drawVBOs() {
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_MULTISAMPLE_ARB );
   glEnable( GL_SAMPLE_ALPHA_TO_COVERAGE );
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor3f(1.0,1.0,1.0);
 
   //  Trees
