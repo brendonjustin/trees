@@ -18,7 +18,7 @@ Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h),
                                               tree_buffer_set(false) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 7), 2);
+  num_blocks = pow(pow(2, 5), 2);
   area = num_blocks * tree_size * 6;
   
   //  For drawing trees
@@ -52,6 +52,12 @@ void Forest::initializeVBOs() {
   glGenBuffers(num_trees, &forest_quad_verts_VBO[0]);
   glGenBuffers(num_trees, &forest_quad_indices_VBO[0]);
   glGenBuffers(num_trees, &forest_quad_texcoords_VBO[0]);
+  // for (int i = 0; i < num_trees; ++i)
+  // {
+  //   glGenBuffers(1, &forest_quad_verts_VBO[i]);
+  //   glGenBuffers(1, &forest_quad_indices_VBO[i]);
+  //   glGenBuffers(1, &forest_quad_texcoords_VBO[i]);
+  // }
   glGenBuffers(1, &gnd_mesh_tri_verts_VBO);
   glGenBuffers(1, &gnd_mesh_tri_indices_VBO);
   glGenBuffers(1, &gnd_mesh_verts_VBO);
@@ -193,6 +199,20 @@ void Forest::setupVBOs() {
                sizeof(VBOTex) * num_trees * 4,
                forest_quad_texcoords,
                GL_STATIC_DRAW);
+
+  // for (int i = 0; i < num_trees; ++i)
+  // {
+  //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,forest_quad_indices_VBO[i]);
+  //   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+  //                sizeof(VBOQuad),
+  //                &forest_quad_indices[i],
+  //                GL_STATIC_DRAW);
+  //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,forest_quad_texcoords_VBO[i]);
+  //   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+  //                sizeof(VBOTex) * 4,
+  //                &forest_quad_texcoords[i],
+  //                GL_STATIC_DRAW);
+  // }
   
   delete [] gnd_mesh_tri_verts;
   delete [] gnd_mesh_tri_indices;
@@ -252,25 +272,25 @@ void Forest::drawVBOs() {
   {
     for (int i = 0; i < num_trees; ++i)
     {
-      glBindBuffer(GL_ARRAY_BUFFER, forest_quad_verts_VBO[i]);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
-      glEnableClientState(GL_NORMAL_ARRAY);
-      glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
+      // glBindBuffer(GL_ARRAY_BUFFER, forest_quad_verts_VBO[i]);
+      // glEnableClientState(GL_VERTEX_ARRAY);
+      // glVertexPointer(3, GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(0));
+      // glEnableClientState(GL_NORMAL_ARRAY);
+      // glNormalPointer(GL_FLOAT, sizeof(VBOTriVert), BUFFER_OFFSET(12));
       // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       // glBindBuffer(GL_ARRAY_BUFFER, forest_quad_texcoords_VBO[i]);
       // glTexCoordPointer(2, GL_FLOAT, sizeof(VBOTex), BUFFER_OFFSET(0));
       // glBindTexture(GL_TEXTURE_2D, forest_quad_textures[i]);
 
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, forest_quad_indices_VBO[i]);
-      glDrawElements(GL_QUADS,
-                     4,
-                     GL_UNSIGNED_INT,
-                     BUFFER_OFFSET(0));
+      // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, forest_quad_indices_VBO[i]);
+      // glDrawElements(GL_QUADS,
+      //                4,
+      //                GL_UNSIGNED_INT,
+      //                BUFFER_OFFSET(0));
       
       // glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-      glDisableClientState(GL_NORMAL_ARRAY);
-      glDisableClientState(GL_VERTEX_ARRAY);
+      // glDisableClientState(GL_NORMAL_ARRAY);
+      // glDisableClientState(GL_VERTEX_ARRAY);
     }
   } else {
     glBindBuffer(GL_ARRAY_BUFFER, forest_quad_verts_VBO[0]);
@@ -348,5 +368,29 @@ void Forest::setTreeQuads() {
                  forest_quad_verts,
                  GL_STATIC_DRAW);
   }
+
+  // if (tree_buffer_set)
+  // {
+  //   for (int i = 0; i < num_trees; ++i)
+  //   {
+  //     glBindBuffer(GL_ARRAY_BUFFER,forest_quad_verts_VBO[i]);
+  //     glBufferSubData(GL_ARRAY_BUFFER,
+  //                     0,
+  //                     sizeof(VBOTriVert) * 4,
+  //                     &forest_quad_verts[i]);
+  //   }
+  // }
+  // else
+  // {
+  //   for (int i = 0; i < num_trees; ++i)
+  //   {
+  //     glBindBuffer(GL_ARRAY_BUFFER,forest_quad_verts_VBO[i]);
+  //     glBufferData(GL_ARRAY_BUFFER,
+  //                  sizeof(VBOTriVert) * 4,
+  //                  &forest_quad_verts[i],
+  //                  GL_STATIC_DRAW);
+  //   }
+  //   tree_buffer_set = true;
+  // }
   
 }
