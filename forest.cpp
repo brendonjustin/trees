@@ -117,7 +117,7 @@ void Forest::setupVBOs() {
   //  Draw ground squares and trees
   int locCounter = 0;
   int countTrees = 0;
-  countTrees = num_trees;
+  countTrees = num_trees-1;
   int blockNumber = 0;
   for (int i = 0; i < sqrt(num_blocks); ++i) {
     baseOffset = cG*i;
