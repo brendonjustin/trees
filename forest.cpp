@@ -18,7 +18,7 @@ Forest::Forest(ArgParser *a, Hemisphere *h) : args(a), hemisphere(h),
                                               tree_buffer_set(false) {
 
   //  Note: num_blocks must be a power of two, squared, i.e. (2^x)^2
-  num_blocks = pow(pow(2, 5), 2);
+  num_blocks = pow(pow(2, 4), 2);
   area = num_blocks * tree_size * 6;
   
   //  For drawing trees
@@ -71,6 +71,7 @@ void Forest::setupVBOs() {
   float blockSideLength;
   //  Area-based weights for vertices, to determine tree heights
   float treeHeight, a1, a2, a3, a4, sumA;
+  int sqrtNumBlocks;
 
   //  The vertices for the squares used for the ground and trees
   Vec3f aG, bG, cG, dG, gndNormal;
@@ -88,7 +89,6 @@ void Forest::setupVBOs() {
   blockSideLength = sqrt(area / num_blocks);
 
   gndNormal = Vec3f(0, 1, 0);
-  hVec = Vec3f(0, 1, 0);
 
   //  For drawing the ground
   //  A variable sized horizontal square with the bottom left corner at 0,0
@@ -96,7 +96,8 @@ void Forest::setupVBOs() {
   bG = Vec3f(blockSideLength, 0,  blockSideLength);
   cG = Vec3f(blockSideLength, 0,  0);
   dG = Vec3f(0,               0,  blockSideLength);
-  hVec = Vec3f(0,1,0);
+  
+  sqrtNumBlocks = sqrt(num_blocks);
   
   //  Tweak some optional parameters and generate terrain heights
    TerrainGenerator::setRatio(0.5f);
@@ -105,8 +106,8 @@ void Forest::setupVBOs() {
 //    TerrainGenerator::setRatio(2.5f);
 //    TerrainGenerator::setScale(2.0f);
   // TerrainGenerator::setScale(100.0f);
-  TerrainGenerator::setScale(sqrt(sqrt(num_blocks)));
-  heights = TerrainGenerator::generate((int)sqrt(num_blocks));
+  TerrainGenerator::setScale(sqrt(sqrtNumBlocks));
+  heights = TerrainGenerator::generate(sqrtNumBlocks);
   
   forest_quad_indices = new VBOQuad[num_trees];
   forest_quad_texcoords = new VBOTex[num_trees*4];
@@ -119,9 +120,9 @@ void Forest::setupVBOs() {
   int countTrees = 0;
   countTrees = num_trees-1;
   int blockNumber = 0;
-  for (int i = 0; i < sqrt(num_blocks); ++i) {
+  for (int i = 0; i < sqrtNumBlocks; ++i) {
     baseOffset = cG*i;
-    for (int j = 0; j < sqrt(num_blocks); ++j) {
+    for (int j = 0; j < sqrtNumBlocks; ++j) {
       blockOffset = baseOffset + dG*j;
 
       //  Add a ground square
@@ -134,10 +135,10 @@ void Forest::setupVBOs() {
       gnd_mesh_tri_indices[locCounter / 2 - 1] = VBOTri(locCounter - 3, locCounter - 4, locCounter - 1);
 
       //  Create the trees in this ground square
-      blockNumber = i*sqrt(num_blocks) + j;
+      blockNumber = i*sqrtNumBlocks + j;
       for (unsigned int k = 0; k < tree_locations[blockNumber].size(); ++k)
       {
-        treeLocation = tree_locations[blockNumber][k] + blockOffset;
+        treeLocation = blockOffset + tree_locations[blockNumber][k];
 
         //  Calculate the height that the tree should be at,
         //  by averaging nearby verticies' heights by proximity
@@ -155,12 +156,13 @@ void Forest::setupVBOs() {
         treeHeight += gnd_mesh_tri_verts[locCounter-2].y * a2;
         treeHeight += gnd_mesh_tri_verts[locCounter-3].y * a3;
         treeHeight += gnd_mesh_tri_verts[locCounter-4].y * a4;
-        treeLocation += treeHeight * hVec;
+        treeLocation.sety(treeHeight);
 
         //  Save the world-space tree coordinate over the block-space coordinate
         tree_locations[blockNumber][k] = treeLocation;
-        //  Create a quad to draw the tree on in another function later
         
+        //  Create the quad to draw the tree on in another function later
+        //  For now just set the vertex indices and texture coordinates
         forest_quad_indices[countTrees] = VBOQuad(locCounter - 4, locCounter - 3, locCounter - 2, locCounter - 1);
         forest_quad_texcoords[countTrees*4] = VBOTex(0,0);
         forest_quad_texcoords[countTrees*4 + 1] = VBOTex(0,1);
@@ -168,7 +170,7 @@ void Forest::setupVBOs() {
         forest_quad_texcoords[countTrees*4 + 3] = VBOTex(1,0);
 
         //  Set the texture for this tree
-        forest_quad_textures[countTrees] = hemisphere->getNearestView(tree_locations[blockNumber][k], camera_pos)->textureID();
+        forest_quad_textures[countTrees] = hemisphere->getNearestView(treeLocation, camera_pos)->textureID();
 
         // ++countTrees;
         --countTrees;
